@@ -20,7 +20,7 @@ model User {
   updated_at DateTime  @updatedAt
   created_at DateTime  @default(now())
 
-  // 1 - 1 relationf454f54dwdwdwe
+  // 1 - 1 relationf454f54dwdwdwewwdweew
   profile    Profile?
 }
 
