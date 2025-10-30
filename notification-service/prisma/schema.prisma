@@ -1,0 +1,48 @@
+generator client {
+	provider = "prisma-client-js"
+}
+
+datasource db {
+	provider = "postgresql"
+	url      = env("DATABASE_URL")
+}
+
+model Notification {
+	id         String   @id @default(uuid())
+	userId     String
+	type       String
+	title      String
+	body       String
+	metadata   Json      @default("{}")
+	isRead     Boolean   @default(false)
+	dedupeKey  String?   @unique
+	createdAt  DateTime  @default(now())
+
+	deliveryLogs DeliveryLog[]
+}
+
+model ProcessedEvent {
+	eventId    String   @id
+	processedAt DateTime @default(now())
+}
+
+model UserPreference {
+	userId       String   @id
+	inApp        Boolean  @default(true)
+	email        Boolean  @default(false)
+	push         Boolean  @default(false)
+	types        Json     @default("{}")
+	quietHours   Json     @default("{}")
+	language     String   @default("en")
+}
+
+model DeliveryLog {
+	id             String   @id @default(uuid())
+	notification   Notification @relation(fields: [notificationId], references: [id])
+	notificationId String
+	channel        String
+	status         String
+	attempt        Int       @default(1)
+	error          String?
+	sentAt         DateTime  @default(now())
+}

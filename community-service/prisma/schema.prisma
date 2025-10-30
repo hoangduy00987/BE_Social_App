@@ -1,0 +1,53 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Community {
+  community_id Int      @id @default(autoincrement())
+  name         String   @unique
+  created_by   Int
+  type_id      Int
+  avatar       String   @default("") 
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  communityType CommunityType     @relation(fields: [type_id], references: [type_id])
+  members       CommunityMember[]
+}
+
+model CommunityType {
+  type_id     Int    @id @default(autoincrement())
+  type        String
+  description String
+
+  communities Community[]
+}
+
+model CommunityMember {
+  id           Int      @id @default(autoincrement())
+  community_id Int
+  user_id      Int
+  role         String   @default("member")
+  status        MemberStatus @default(APPROVED)
+  joined_at    DateTime @default(now())
+
+  community Community @relation(fields: [community_id], references: [community_id])
+  @@unique([community_id, user_id])
+}
+
+enum MemberStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
