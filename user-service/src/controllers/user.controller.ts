@@ -1,6 +1,7 @@
-import { Body, Controller, Post, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Post,Get,Req,UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { UserService } from '../services/user.service';
 import { IsEmail, IsNotEmpty, MinLength } from 'class-validator';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 class RegisterDto {
   @IsEmail()
@@ -36,5 +37,10 @@ export class UserController {
   @UsePipes(new ValidationPipe({ whitelist: true }))
   async login(@Body() body: LoginDto) {
     return this.userService.login(body.email, body.password);
+  }
+  @UseGuards(JwtAuthGuard)  
+  @Get('profile')
+  async getProfile(@Req() req) {
+    return this.userService.getProfile(req.user.id);
   }
 }

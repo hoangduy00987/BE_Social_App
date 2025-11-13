@@ -3,15 +3,15 @@ import * as bcrypt from 'bcryptjs';
 import { UserModel } from '../models/user.model';
 import { JwtService } from '@nestjs/jwt';
 import { jwtConstants } from '../config/jwt.config';
+import { use } from 'passport';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly userModel: UserModel,
     private readonly jwtService: JwtService,
-  ) {}
+  ) { }
 
-  // ============ HÀM ĐĂNG KÝ (bạn đã có rồi) ============
   async register(email: string, password: string, full_name: string) {
     const existing = await this.userModel.findByEmail(email);
     if (existing) throw new ConflictException('Email already exists');
@@ -26,47 +26,52 @@ export class UserService {
     return this.generateAuthResponse(user);
   }
 
-  // ============ HÀM ĐĂNG NHẬP ============
   async login(email: string, password: string) {
-    // 1️⃣ Tìm user theo email
     const user = await this.userModel.findByEmail(email);
     if (!user) {
       throw new UnauthorizedException('Invalid email or password');
     }
 
-    // 2️⃣ So sánh mật khẩu người dùng nhập vào
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid email or password');
     }
 
-    // 3️⃣ Sinh token và trả kết quả
     return this.generateAuthResponse(user);
   }
 
-  // ============ HÀM TẠO TOKEN VÀ TRẢ VỀ RESPONSE ============
+  async getProfile(userId: number) {
+    const user = await this.userModel.findById(userId);
+
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    const { password, ...safeUser } = user;
+
+    return safeUser;
+  }
+
+
   private async generateAuthResponse(user: any) {
     const payload = { sub: user.id, email: user.email };
 
-    // Access token
     const access_token = await this.jwtService.signAsync(payload as any, {
       secret: jwtConstants.access_secret as any,
       expiresIn: jwtConstants.access_expires as any,
     });
 
-    // Refresh token
     const refresh_token = await this.jwtService.signAsync(payload as any, {
       secret: jwtConstants.refresh_secret as any,
       expiresIn: jwtConstants.refresh_expires as any,
     });
 
-    // Loại bỏ password trước khi trả về
-    const { password: _, ...safeUser } = user as any;
-
     return {
-      user: safeUser,
+      is_admin: user.is_admin,
       access_token,
       refresh_token,
     };
   }
+
+
 }

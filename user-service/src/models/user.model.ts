@@ -12,6 +12,17 @@ export class UserModel {
     });
   }
 
+    async findById(id: number): Promise<User | null> {
+  return this.prisma.user.findUnique({
+    where: { id },
+    include: {
+      profile: true, 
+    },
+  });
+
+
+  }
+
   async createUser(data: Prisma.UserCreateInput): Promise<User> {
     return this.prisma.user.create({
       data,
