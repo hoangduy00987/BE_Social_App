@@ -22,6 +22,12 @@ export class UserModel {
 
 
   }
+async updateProfile(id: number, data: any) {
+  return this.prisma.profile.update({
+    where: { user_id: id },
+    data,
+  });
+}
 
   async createUser(data: Prisma.UserCreateInput): Promise<User> {
     return this.prisma.user.create({

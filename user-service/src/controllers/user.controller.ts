@@ -1,8 +1,8 @@
-import { Body, Controller, Post,Get,Req,UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Post, Get, Req, UseGuards, UsePipes, ValidationPipe, Put } from '@nestjs/common';
 import { UserService } from '../services/user.service';
-import { IsEmail, IsNotEmpty, MinLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, MinLength, IsString, IsBoolean, IsOptional } from 'class-validator';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-
+import { ProfileDTO } from '../DTO/profile.dto'
 class RegisterDto {
   @IsEmail()
   email: string;
@@ -23,9 +23,11 @@ class LoginDto {
   password: string;
 }
 
+
+
 @Controller('users')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) { }
 
   @Post('register')
   @UsePipes(new ValidationPipe({ whitelist: true }))
@@ -38,9 +40,19 @@ export class UserController {
   async login(@Body() body: LoginDto) {
     return this.userService.login(body.email, body.password);
   }
-  @UseGuards(JwtAuthGuard)  
+
+  @UseGuards(JwtAuthGuard)
   @Get('profile')
   async getProfile(@Req() req) {
     return this.userService.getProfile(req.user.id);
   }
+  @UseGuards(JwtAuthGuard)
+  @Put('profile')
+  async updateProfile(
+    @Req() req,
+    @Body() dto: ProfileDTO
+  ) {
+    return this.userService.updateProfile(req.user.id, dto);
+  }
+
 }
