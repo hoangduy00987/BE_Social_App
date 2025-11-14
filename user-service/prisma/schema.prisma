@@ -20,7 +20,6 @@ model User {
   updated_at DateTime  @updatedAt
   created_at DateTime  @default(now())
 
-  // 1 - 1 relationf454f54dwdwdwewwdweew
   profile    Profile?
 }
 
@@ -33,6 +32,5 @@ model Profile {
   updated_at DateTime  @updatedAt
   created_at DateTime  @default(now())
 
-  // Quan hệ với User
   user       User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }

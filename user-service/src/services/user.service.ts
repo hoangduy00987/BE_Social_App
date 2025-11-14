@@ -4,7 +4,7 @@ import { UserModel } from '../models/user.model';
 import { JwtService } from '@nestjs/jwt';
 import { jwtConstants } from '../config/jwt.config';
 import { use } from 'passport';
-
+import { ProfileDTO } from '../DTO/profile.dto'
 @Injectable()
 export class UserService {
   constructor(
@@ -50,6 +50,17 @@ export class UserService {
     const { password, ...safeUser } = user;
 
     return safeUser;
+  }
+
+  async updateProfile(userId: number, dto: ProfileDTO) {
+    const user = await this.userModel.findById(userId);
+    if (!user) throw new UnauthorizedException('User not found');
+
+    return this.userModel.updateProfile(userId, {
+      full_name: dto.full_name,
+      avatar: dto.avatar,
+      gender: dto.gender,
+    });
   }
 
 
