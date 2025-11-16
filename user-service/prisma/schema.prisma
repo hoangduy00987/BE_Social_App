@@ -27,7 +27,7 @@ model Profile {
   id         Int       @id @default(autoincrement())
   user_id    Int       @unique
   full_name  String
-  avatar     Boolean   @default(false)
+  avatar     String?   
   gender     Boolean?
   updated_at DateTime  @updatedAt
   created_at DateTime  @default(now())

@@ -1,8 +1,11 @@
-import { Body, Controller, Post, Get, Req, UseGuards, UsePipes, ValidationPipe, Put } from '@nestjs/common';
+import { Body, Controller, Post, Get, Req, UseGuards, UsePipes, ValidationPipe, Put, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { UserService } from '../services/user.service';
 import { IsEmail, IsNotEmpty, MinLength, IsString, IsBoolean, IsOptional } from 'class-validator';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ProfileDTO } from '../DTO/profile.dto'
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 class RegisterDto {
   @IsEmail()
   email: string;
@@ -46,13 +49,38 @@ export class UserController {
   async getProfile(@Req() req) {
     return this.userService.getProfile(req.user.id);
   }
-  @UseGuards(JwtAuthGuard)
+  
   @Put('profile')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(
+    FileInterceptor('avatar', {
+      storage: diskStorage({
+        destination: './uploads/avatar',
+        filename: (req, file, callback) => {
+          const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          callback(null, unique + extname(file.originalname));
+        },
+      }),
+    }),
+  )
   async updateProfile(
+    @Body() dto: ProfileDTO,
+    @UploadedFile() file: Express.Multer.File,
     @Req() req,
-    @Body() dto: ProfileDTO
   ) {
-    return this.userService.updateProfile(req.user.id, dto);
-  }
+    const userId = req.user.id;
 
+    const profile = await this.userService.updateProfile(
+      userId,
+      dto,
+      file,
+    );
+
+    return {
+      message: 'Profile updated successfully',
+      profile
+    }
+
+
+  }
 }
