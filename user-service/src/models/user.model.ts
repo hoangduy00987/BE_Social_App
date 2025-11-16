@@ -22,6 +22,11 @@ export class UserModel {
 
 
   }
+   async findByUserId(userId: number) {
+    return this.prisma.profile.findUnique({
+      where: { user_id: userId },
+    });
+  }
 async updateProfile(id: number, data: any) {
   return this.prisma.profile.update({
     where: { user_id: id },

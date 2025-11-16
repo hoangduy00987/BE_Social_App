@@ -1,17 +1,15 @@
-
-import {IsString, IsBoolean, IsOptional } from 'class-validator';
-
+import { IsString, IsBoolean, IsOptional, IsIn } from 'class-validator';
 
 export class ProfileDTO {
   @IsString()
   @IsOptional()
   full_name?: string;
 
-  @IsBoolean()
+  @IsString()
   @IsOptional()
-  avatar?: boolean;
+  avatar?: string;
 
-  @IsBoolean()
+  @IsIn(['0', '1'])
   @IsOptional()
-  gender?: boolean;
+  gender?: string;
 }

@@ -5,6 +5,9 @@ import { JwtService } from '@nestjs/jwt';
 import { jwtConstants } from '../config/jwt.config';
 import { use } from 'passport';
 import { ProfileDTO } from '../DTO/profile.dto'
+import * as fs from 'fs';
+import { join } from 'path';
+
 @Injectable()
 export class UserService {
   constructor(
@@ -52,15 +55,52 @@ export class UserService {
     return safeUser;
   }
 
-  async updateProfile(userId: number, dto: ProfileDTO) {
-    const user = await this.userModel.findById(userId);
-    if (!user) throw new UnauthorizedException('User not found');
+  async updateProfile(
+    userId: number,
+    dto: ProfileDTO,
+    file?: Express.Multer.File,
+  ) {
+    const profile = await this.userModel.findByUserId(userId);
+    if (dto.gender !== undefined && dto.gender !== null) {
+      const genderString = dto.gender.toString();
+      const genderBool = genderString === "1";
 
-    return this.userModel.updateProfile(userId, {
+      dto.gender = genderBool as any;
+    }
+
+
+    if (!profile) {
+      throw new UnauthorizedException('Profile not found');
+    }
+
+    let avatar = profile.avatar;
+
+    // Nếu upload avatar mới
+    if (file) {
+      // XÓA avatar cũ nếu có
+      if (profile.avatar) {
+        const oldPath = join(
+          __dirname,
+          '..',
+          '..',
+          'uploads',
+          'avatar',
+          profile.avatar,
+        );
+        if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+      }
+
+      avatar = file.filename;
+    }
+
+    // Gọi model để update
+    const updatedProfile = await this.userModel.updateProfile(userId, {
       full_name: dto.full_name,
-      avatar: dto.avatar,
       gender: dto.gender,
+      avatar: avatar,
     });
+
+    return updatedProfile;
   }
 
 
