@@ -1,5 +1,5 @@
-import app from "./app";
-import envConfig from "./config/env.config";
+import app from "./app.js";
+import envConfig from "./config/env.config.js";
 // import { initKafkaProducer } from "./lib/kafkaClient";
 
 const PORT = envConfig.PORT;

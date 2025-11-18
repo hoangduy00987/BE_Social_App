@@ -1,5 +1,5 @@
-import { PostgresClient } from "../core/database/PostgresClient";
-import { Comment } from "../models/comment.model";
+import { PostgresClient } from "../core/database/PostgresClient.js";
+import { Comment } from "../models/comment.model.js";
 
 export class CommentRepository {
   private db = PostgresClient.getInstance();

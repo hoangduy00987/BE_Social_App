@@ -6,9 +6,14 @@ import { jwtConstants } from '../config/jwt.config';
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor() {
+    const secret = jwtConstants.access_secret;
+    if (!secret) {
+      throw new Error('JWT access_secret is missing');
+    }
+
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: jwtConstants.access_secret,
+      secretOrKey: secret,
     });
   }
 

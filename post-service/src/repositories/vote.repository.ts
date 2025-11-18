@@ -1,5 +1,5 @@
-import { PostgresClient } from "../core/database/PostgresClient";
-import { Vote } from "../models/vote.model";
+import { PostgresClient } from "../core/database/PostgresClient.js";
+import { Vote } from "../models/vote.model.js";
 
 export class VoteRepository {
   private db = PostgresClient.getInstance();

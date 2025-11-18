@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { VoteService } from "../services/votes.service";
+import { VoteService } from "../services/votes.service.js";
 
 export class VoteController {
   private voteService: VoteService;

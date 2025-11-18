@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { VoteController } from "../controllers/votes.controller";
-import { authHandler } from "../shared/middlewares/auth.middleware";
+import { VoteController } from "../controllers/votes.controller.js";
+import { authHandler } from "../shared/middlewares/auth.middleware.js";
 
 const router = Router();
 const controller = new VoteController();

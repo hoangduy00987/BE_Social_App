@@ -1,4 +1,4 @@
-import envConfig from "./env.config";
+import envConfig from "./env.config.js";
 
 export class DBConfig {
   private constructor() {}

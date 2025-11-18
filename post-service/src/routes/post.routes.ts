@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { PostController } from "../controllers/posts.controller";
-import { authHandler } from "../shared/middlewares/auth.middleware";
+import { PostController } from "../controllers/posts.controller.js";
+import { authHandler } from "../shared/middlewares/auth.middleware.js";
 
 const router = Router();
 const controller = new PostController();

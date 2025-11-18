@@ -1,7 +1,7 @@
 import { Router } from "express";
-import postRoutes from "./post.routes";
-import voteRoutes from "./vote.routes";
-import commentRoutes from "./comment.routes";
+import postRoutes from "./post.routes.js";
+import voteRoutes from "./vote.routes.js";
+import commentRoutes from "./comment.routes.js";
 
 const router = Router();
 

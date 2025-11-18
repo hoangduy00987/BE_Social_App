@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import { logger } from "./logger.middleware";
-import envConfig from "../../config/env.config";
+import { logger } from "./logger.middleware.js";
+import envConfig from "../../config/env.config.js";
 
 interface AppError extends Error {
   status: number;

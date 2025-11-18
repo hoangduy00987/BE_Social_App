@@ -1,7 +1,7 @@
-import { PostgresClient } from "../core/database/PostgresClient";
-import { RepositoryFactory } from "../core/factories/RepositoryFactory";
-import { Vote } from "../models/vote.model";
-import { VoteRepository } from "../repositories/vote.repository";
+import { PostgresClient } from "../core/database/PostgresClient.js";
+import { RepositoryFactory } from "../core/factories/RepositoryFactory.js";
+import { Vote } from "../models/vote.model.js";
+import { VoteRepository } from "../repositories/vote.repository.js";
 
 export class VoteService {
   private voteRepo;

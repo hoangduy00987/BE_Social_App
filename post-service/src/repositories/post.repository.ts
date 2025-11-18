@@ -1,5 +1,5 @@
-import { Post } from "../models/post.model";
-import { PostgresClient } from "../core/database/PostgresClient";
+import { Post } from "../models/post.model.js";
+import { PostgresClient } from "../core/database/PostgresClient.js";
 
 export class PostRepository {
   private db = PostgresClient.getInstance();

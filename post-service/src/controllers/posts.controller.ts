@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { PostService } from "../services/posts.service";
+import { PostService } from "../services/posts.service.js";
 
 export class PostController {
   private postService: PostService;

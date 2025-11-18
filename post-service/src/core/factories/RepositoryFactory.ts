@@ -1,8 +1,8 @@
-import { CommentRepository } from "../../repositories/comment.repository";
-import { PostMediaRepository } from "../../repositories/post-media.repository";
-import { PostRepository } from "../../repositories/post.repository";
-import { SavedPostRepository } from "../../repositories/saved-post.repository";
-import { VoteRepository } from "../../repositories/vote.repository";
+import { CommentRepository } from "../../repositories/comment.repository.js";
+import { PostMediaRepository } from "../../repositories/post-media.repository.js";
+import { PostRepository } from "../../repositories/post.repository.js";
+import { SavedPostRepository } from "../../repositories/saved-post.repository.js";
+import { VoteRepository } from "../../repositories/vote.repository.js";
 
 export class RepositoryFactory {
   createRepository(entity: string) {

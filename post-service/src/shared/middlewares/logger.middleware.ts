@@ -1,6 +1,6 @@
 import { createLogger, format, transports } from "winston";
 import morgan from "morgan";
-import envConfig from "../../config/env.config";
+import envConfig from "../../config/env.config.js";
 
 const { combine, timestamp, printf, colorize } = format;
 

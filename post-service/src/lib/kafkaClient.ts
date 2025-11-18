@@ -1,9 +1,9 @@
 import { Kafka } from "kafkajs";
-import envConfig from "../config/env.config";
+import envConfig from "../config/env.config.js";
 
 const kafka = new Kafka({
   clientId: "post-service",
-  brokers: [envConfig.KAFKA_BROKER],
+  brokers: [envConfig.KAFKA_BROKERS],
 });
 
 export const producer = kafka.producer();
