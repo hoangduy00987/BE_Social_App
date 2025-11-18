@@ -10,7 +10,7 @@ interface EnvConfig {
   DB_PASS?: string;
   DB_NAME?: string;
   CORS_ALLOWED_ORIGIN: string[];
-  KAFKA_BROKER: string;
+  KAFKA_BROKERS: string;
 }
 
 const envConfig: EnvConfig = {
@@ -25,7 +25,7 @@ const envConfig: EnvConfig = {
     "http://localhost:3000",
     "http://localhost:8081",
   ],
-  KAFKA_BROKER: process.env.KAFKA_BROKER || "localhost:9093",
+  KAFKA_BROKERS: process.env.KAFKA_BROKERS || "localhost:9093",
 };
 
 export default envConfig;

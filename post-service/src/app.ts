@@ -1,12 +1,12 @@
 import express from "express";
 import cors from "cors";
-import corsOptions from "./config/cors.config";
-import routes from "./routes";
-import errorHandler from "./shared/middlewares/error.middleware";
-import { httpRequestLogger } from "./shared/middlewares/logger.middleware";
+import corsOptions from "./config/cors.config.js";
+import routes from "./routes/index.js";
+import errorHandler from "./shared/middlewares/error.middleware.js";
+import { httpRequestLogger } from "./shared/middlewares/logger.middleware.js";
 import { clerkMiddleware } from "@clerk/express";
-import notFoundHandler from "./shared/utils/404";
-// import { producer } from "./lib/kafkaClient";
+import notFoundHandler from "./shared/utils/404.js";
+// import { producer } from "./lib/kafkaClient.js";
 
 const app = express();
 

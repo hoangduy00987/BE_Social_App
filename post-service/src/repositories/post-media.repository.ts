@@ -1,4 +1,4 @@
-import { PostgresClient } from "../core/database/PostgresClient";
+import { PostgresClient } from "../core/database/PostgresClient.js";
 
 export class PostMediaRepository {
   private db = PostgresClient.getInstance();

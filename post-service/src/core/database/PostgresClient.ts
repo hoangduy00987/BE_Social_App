@@ -1,5 +1,5 @@
 import { Pool } from "pg";
-import { DBConfig } from "../../config/db.config";
+import { DBConfig } from "../../config/db.config.js";
 
 export class PostgresClient {
   private static instance: Pool;

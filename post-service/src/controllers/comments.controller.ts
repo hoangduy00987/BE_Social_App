@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { CommentService } from "../services/comments.service";
+import { CommentService } from "../services/comments.service.js";
 
 export class CommentController {
   private commentService: CommentService;

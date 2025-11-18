@@ -1,12 +1,12 @@
 import slug from "slug";
-import { RepositoryFactory } from "../core/factories/RepositoryFactory";
-import { PostgresClient } from "../core/database/PostgresClient";
-import { Post } from "../models/post.model";
-import { PostRepository } from "../repositories/post.repository";
-import { PostMedia } from "../models/post-media.model";
-import { PostMediaRepository } from "../repositories/post-media.repository";
-import { SavedPost } from "../models/saved-post.model";
-import { SavedPostRepository } from "../repositories/saved-post.repository";
+import { RepositoryFactory } from "../core/factories/RepositoryFactory.js";
+import { PostgresClient } from "../core/database/PostgresClient.js";
+import { Post } from "../models/post.model.js";
+import { PostRepository } from "../repositories/post.repository.js";
+import { PostMedia } from "../models/post-media.model.js";
+import { PostMediaRepository } from "../repositories/post-media.repository.js";
+import { SavedPost } from "../models/saved-post.model.js";
+import { SavedPostRepository } from "../repositories/saved-post.repository.js";
 
 export class PostService {
   private postRepo;

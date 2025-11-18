@@ -1,6 +1,6 @@
-import { RepositoryFactory } from "../core/factories/RepositoryFactory";
-import { Comment } from "../models/comment.model";
-import { CommentRepository } from "../repositories/comment.repository";
+import { RepositoryFactory } from "../core/factories/RepositoryFactory.js";
+import { Comment } from "../models/comment.model.js";
+import { CommentRepository } from "../repositories/comment.repository.js";
 
 export class CommentService {
   private commentRepo;

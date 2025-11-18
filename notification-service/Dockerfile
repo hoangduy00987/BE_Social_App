@@ -1,20 +1,30 @@
 # syntax=docker/dockerfile:1
-FROM node:20-slim AS base
+FROM node:20-alpine AS base
 WORKDIR /app
-
-FROM base AS deps
-COPY package.json package-lock.json* pnpm-lock.yaml* yarn.lock* ./
-RUN npm ci || npm install
+RUN apk add --no-cache openssl libc6-compat
 
 FROM base AS build
-COPY --from=deps /app/node_modules ./node_modules
+COPY package.json ./
+RUN npm install
 COPY . .
+RUN npx prisma generate
 RUN npm run build
 
 FROM base AS runtime
 ENV NODE_ENV=production
-COPY --from=deps /app/node_modules ./node_modules
+
+RUN apk add --no-cache tzdata
+COPY package.json ./
+RUN npm install --omit=dev
 COPY --from=build /app/dist ./dist
-COPY package.json ./package.json
-EXPOSE 3000
-CMD ["node", "dist/index.js"]
+COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=build /app/prisma ./prisma
+
+COPY entrypoint.sh ./
+RUN chmod +x entrypoint.sh
+
+ENV TZ=Asia/Ho_Chi_Minh
+ENV PORT=3004
+EXPOSE 3004
+
+CMD ["./entrypoint.sh"]

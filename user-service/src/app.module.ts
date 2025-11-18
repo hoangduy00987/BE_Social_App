@@ -8,6 +8,7 @@ import { UserModel } from './models/user.model';
 
 import { JwtStrategy } from './auth/jwt.strategy'; 
 import { jwtConstants } from './config/jwt.config';
+import { AuthController } from './controllers/auth.controller';
 
 @Module({
   imports: [
@@ -18,7 +19,7 @@ import { jwtConstants } from './config/jwt.config';
       signOptions: { expiresIn: jwtConstants.access_expires as any },
     }),
   ],
-  controllers: [UserController],
+  controllers: [UserController, AuthController],
   providers: [
     UserService,
     UserModel,
