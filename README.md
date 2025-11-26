@@ -1,2 +1,2 @@
-# Social App
-# update cache
+#Run app 
+cd 
