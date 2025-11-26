@@ -13,9 +13,8 @@
   "verbose": true,
   "decamelize": false,
 
-  "pgOptions": {
-    "ssl": {
-      "rejectUnauthorized": false
-    }
-  }
+
+  "ssl": {
+    "rejectUnauthorized": false
+  }  
 }
