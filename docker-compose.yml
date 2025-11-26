@@ -98,13 +98,14 @@ services:
     networks:
       - app-network
 
-  post-migrate:
+    post-migrate:
     build: ./post-service
     container_name: post-migrate
     depends_on:
       kafka:
         condition: service_healthy
     environment:
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
       - DATABASE_URL=${POST_DATABASE_URL}
       - DB_HOST=${POST_DB_HOST}
       - DB_PORT=${POST_DB_PORT}
@@ -115,6 +116,7 @@ services:
     networks:
       - app-network
     restart: "no"
+
 
   post-service-1:
     build: ./post-service
