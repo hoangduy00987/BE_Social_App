@@ -24,8 +24,7 @@ services:
     volumes:
       - ./nginx/certbot:/var/www/certbot
       - ./nginx/letsencrypt:/etc/letsencrypt
-    entrypoint: >
-      sh -c "certbot certonly --webroot --webroot-path=/var/www/certbot -d api.hellodev.io.vn --email hoangduy00987@gmail.com --agree-tos --non-interactive"
+    entrypoint: sh -c "certbot certonly --webroot --webroot-path=/var/www/certbot -d api.hellodev.io.vn --email hoangduy00987@gmail.com --agree-tos --non-interactive"
     networks:
       - app-network
 
