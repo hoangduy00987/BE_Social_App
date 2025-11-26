@@ -11,5 +11,11 @@
   "migrationFileLanguage": "js",
   "checkOrder": true,
   "verbose": true,
-  "decamelize": false
+  "decamelize": false,
+
+  "pgOptions": {
+    "ssl": {
+      "rejectUnauthorized": false
+    }
+  }
 }
