@@ -15,18 +15,45 @@ services:
       - post-service-2
       - community-service
       - notification-service
+      - certbot_init
     networks:
       - app-network
 
-  certbot:
-    image: certbot/certbot
-    container_name: certbot
+  # --- CHẠY CERTBOT 1 LẦN DUY NHẤT KHI KHỞI TẠO ---
+  certbot_init:
+    image: certbot/certbot:latest
+    container_name: certbot_init
     volumes:
       - ./nginx/certbot:/var/www/certbot
       - ./nginx/letsencrypt:/etc/letsencrypt
-    entrypoint: sh -c "certbot certonly --webroot --webroot-path=/var/www/certbot -d api.hellodev.io.vn --email hoangduy00987@gmail.com --agree-tos --non-interactive"
+    entrypoint: >
+      sh -c "
+        certbot certonly --webroot -w /var/www/certbot
+        -d api.hellodev.io.vn
+        --email hoangduy00987@gmail.com
+        --agree-tos --non-interactive || true
+      "
     networks:
       - app-network
+
+  # --- RENEW SSL AUTO MỖI 12H ---
+  certbot_renew:
+    image: certbot/certbot:latest
+    container_name: certbot_renew
+    volumes:
+      - ./nginx/certbot:/var/www/certbot
+      - ./nginx/letsencrypt:/etc/letsencrypt
+    entrypoint: >
+      sh -c "
+        while :; do
+          certbot renew --quiet;
+          sleep 12h;
+        done
+      "
+    networks:
+      - app-network
+
+  # ----------- CÁC SERVICE KHÁC GIỮ NGUYÊN ----------------
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.8.0
@@ -38,12 +65,6 @@ services:
       - "22181:2181"
     networks:
       - app-network
-    healthcheck:
-      test: ["CMD-SHELL", "echo stat | nc localhost 2181"]
-      interval: 5s
-      timeout: 10s
-      retries: 5
-      start_period: 10s
 
   kafka:
     image: confluentinc/cp-kafka:7.8.0
@@ -63,16 +84,6 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
     networks:
       - app-network
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "kafka-broker-api-versions --bootstrap-server localhost:9092 || exit 1",
-        ]
-      interval: 10s
-      timeout: 10s
-      retries: 5
-      start_period: 30s
 
   user-service:
     build: ./user-service
@@ -90,16 +101,8 @@ services:
   post-migrate:
     build: ./post-service
     container_name: post-migrate
-    depends_on:
-      kafka:
-        condition: service_healthy
     environment:
       - DATABASE_URL=${POST_DATABASE_URL}
-      - DB_HOST=${POST_DB_HOST}
-      - DB_PORT=${POST_DB_PORT}
-      - DB_USER=${POST_DB_USER}
-      - DB_PASSWORD=${POST_DB_PASSWORD}
-      - DB_NAME=${POST_DB_NAME}
     command: sh -c "npm run migrate up"
     networks:
       - app-network
@@ -109,21 +112,10 @@ services:
     build: ./post-service
     container_name: post-service-1
     depends_on:
-      post-migrate:
-        condition: service_completed_successfully
-      kafka:
-        condition: service_healthy
+      - post-migrate
     environment:
       - PORT=3002
-      - NODE_ENV=${NODE_ENV}
       - DATABASE_URL=${POST_DATABASE_URL}
-      - DB_HOST=${POST_DB_HOST}
-      - DB_PORT=${POST_DB_PORT}
-      - DB_USER=${POST_DB_USER}
-      - DB_PASSWORD=${POST_DB_PASSWORD}
-      - DB_NAME=${POST_DB_NAME}
-      - CORS_ALLOWED_ORIGIN=${CORS_ALLOWED_ORIGIN}
-      - KAFKA_BROKERS=${KAFKA_BROKERS}
     networks:
       - app-network
 
@@ -131,58 +123,28 @@ services:
     build: ./post-service
     container_name: post-service-2
     depends_on:
-      post-migrate:
-        condition: service_completed_successfully
-      kafka:
-        condition: service_healthy
+      - post-migrate
     environment:
       - PORT=3002
-      - NODE_ENV=${NODE_ENV}
       - DATABASE_URL=${POST_DATABASE_URL}
-      - DB_HOST=${POST_DB_HOST}
-      - DB_PORT=${POST_DB_PORT}
-      - DB_USER=${POST_DB_USER}
-      - DB_PASSWORD=${POST_DB_PASSWORD}
-      - DB_NAME=${POST_DB_NAME}
-      - CORS_ALLOWED_ORIGIN=${CORS_ALLOWED_ORIGIN}
-      - KAFKA_BROKERS=${KAFKA_BROKERS}
     networks:
       - app-network
 
   community-service:
     build: ./community-service
     container_name: community-service
-    depends_on:
-      kafka:
-        condition: service_healthy
     environment:
       - PORT=3003
-      - PG_HOST=${COMMUNITY_PG_HOST}
-      - PG_PORT=${COMMUNITY_PG_PORT}
-      - PG_USER=${COMMUNITY_PG_USER}
-      - PG_PASSWORD=${COMMUNITY_PG_PASSWORD}
-      - PG_DATABASE=${COMMUNITY_PG_DATABASE}
       - DATABASE_URL=${COMMUNITY_DATABASE_URL}
-      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
-      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
-      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
     networks:
       - app-network
 
   notification-service:
     build: ./notification-service
     container_name: notification-service
-    depends_on:
-      kafka:
-        condition: service_healthy
     environment:
       - PORT=3004
       - DATABASE_URL=${NOTIFICATION_DATABASE_URL}
-      - NODE_ENV=${NODE_ENV}
-      - KAFKA_BROKERS=${KAFKA_BROKERS}
-      - KAFKA_CLIENT_ID=${KAFKA_CLIENT_ID}
-      - KAFKA_GROUP_ID=${KAFKA_GROUP_ID}
-      - CORS_ORIGINS=${CORS_ALLOWED_ORIGIN}
     networks:
       - app-network
 
