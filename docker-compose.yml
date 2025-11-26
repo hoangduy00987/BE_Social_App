@@ -60,7 +60,7 @@ services:
       retries: 10
       start_period: 20s
 
-    kafka:
+  kafka:
     image: confluentinc/cp-kafka:7.8.0
     container_name: notifications_kafka
     depends_on:
@@ -84,7 +84,6 @@ services:
       timeout: 10s
       retries: 10
       start_period: 20s
-
 
   user-service:
     build: ./user-service
