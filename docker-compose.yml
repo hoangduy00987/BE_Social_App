@@ -1,4 +1,8 @@
 services:
+
+  # ==========================
+  # NGINX + CERTBOT
+  # ==========================
   nginx:
     image: nginx:1.27-alpine
     container_name: api-gateway-nginx
@@ -43,6 +47,9 @@ services:
     networks:
       - app-network
 
+  # ==========================
+  # ZOOKEEPER + KAFKA
+  # ==========================
   zookeeper:
     image: confluentinc/cp-zookeeper:7.8.0
     container_name: notifications_zookeeper
@@ -85,6 +92,9 @@ services:
       retries: 10
       start_period: 20s
 
+  # ==========================
+  # USER SERVICE
+  # ==========================
   user-service:
     build: ./user-service
     container_name: user-service
@@ -98,7 +108,10 @@ services:
     networks:
       - app-network
 
-    post-migrate:
+  # ==========================
+  # POST MIGRATION (RUN FIRST)
+  # ==========================
+  post-migrate:
     build: ./post-service
     container_name: post-migrate
     depends_on:
@@ -107,34 +120,24 @@ services:
     environment:
       - NODE_TLS_REJECT_UNAUTHORIZED=0
       - DATABASE_URL=${POST_DATABASE_URL}
-      - DB_HOST=${POST_DB_HOST}
-      - DB_PORT=${POST_DB_PORT}
-      - DB_USER=${POST_DB_USER}
-      - DB_PASSWORD=${POST_DB_PASSWORD}
-      - DB_NAME=${POST_DB_NAME}
     command: sh -c "npm run migrate up"
     networks:
       - app-network
     restart: "no"
 
-
+  # ==========================
+  # POST SERVICES
+  # ==========================
   post-service-1:
     build: ./post-service
     container_name: post-service-1
     depends_on:
       post-migrate:
         condition: service_completed_successfully
-      kafka:
-        condition: service_healthy
     environment:
       - PORT=3002
       - NODE_ENV=${NODE_ENV}
       - DATABASE_URL=${POST_DATABASE_URL}
-      - DB_HOST=${POST_DB_HOST}
-      - DB_PORT=${POST_DB_PORT}
-      - DB_USER=${POST_DB_USER}
-      - DB_PASSWORD=${POST_DB_PASSWORD}
-      - DB_NAME=${POST_DB_NAME}
       - CORS_ALLOWED_ORIGIN=${CORS_ALLOWED_ORIGIN}
       - KAFKA_BROKERS=${KAFKA_BROKERS}
     networks:
@@ -146,22 +149,18 @@ services:
     depends_on:
       post-migrate:
         condition: service_completed_successfully
-      kafka:
-        condition: service_healthy
     environment:
       - PORT=3002
       - NODE_ENV=${NODE_ENV}
       - DATABASE_URL=${POST_DATABASE_URL}
-      - DB_HOST=${POST_DB_HOST}
-      - DB_PORT=${POST_DB_PORT}
-      - DB_USER=${POST_DB_USER}
-      - DB_PASSWORD=${POST_DB_PASSWORD}
-      - DB_NAME=${POST_DB_NAME}
       - CORS_ALLOWED_ORIGIN=${CORS_ALLOWED_ORIGIN}
       - KAFKA_BROKERS=${KAFKA_BROKERS}
     networks:
       - app-network
 
+  # ==========================
+  # COMMUNITY SERVICE
+  # ==========================
   community-service:
     build: ./community-service
     container_name: community-service
@@ -170,18 +169,21 @@ services:
         condition: service_healthy
     environment:
       - PORT=3003
+      - DATABASE_URL=${COMMUNITY_DATABASE_URL}
       - PG_HOST=${COMMUNITY_PG_HOST}
       - PG_PORT=${COMMUNITY_PG_PORT}
       - PG_USER=${COMMUNITY_PG_USER}
       - PG_PASSWORD=${COMMUNITY_PG_PASSWORD}
       - PG_DATABASE=${COMMUNITY_PG_DATABASE}
-      - DATABASE_URL=${COMMUNITY_DATABASE_URL}
       - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
       - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
       - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
     networks:
       - app-network
 
+  # ==========================
+  # NOTIFICATION SERVICE
+  # ==========================
   notification-service:
     build: ./notification-service
     container_name: notification-service
