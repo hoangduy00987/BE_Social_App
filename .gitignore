@@ -40,3 +40,6 @@ node_modules/
 
 dist
 .output
+__pycache__/
+*.py[codz]
+*$py.class
