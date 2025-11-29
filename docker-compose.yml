@@ -13,12 +13,6 @@ services:
       - "22181:2181"
     networks:
       - app-network
-    healthcheck:
-      test: ["CMD-SHELL", "echo stat | nc localhost 2181"]
-      interval: 5s
-      timeout: 10s
-      retries: 10
-      start_period: 20s
 
   kafka:
     image: confluentinc/cp-kafka:7.8.0
@@ -38,12 +32,6 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
     networks:
       - app-network
-    healthcheck:
-      test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:9092 || exit 1"]
-      interval: 10s
-      timeout: 10s
-      retries: 10
-      start_period: 20s
 
   # ==========================
   # USER SERVICE
@@ -51,13 +39,10 @@ services:
   user-service:
     build: ./user-service
     container_name: user-service
+    ports:
+      - "3000:3000"
     environment:
       - PORT=3000
-      - DATABASE_URL=${USER_DATABASE_URL}
-      - ACCESS_SECRET=${ACCESS_SECRET}
-      - REFRESH_SECRET=${REFRESH_SECRET}
-      - ACCESS_EXPIRES=${ACCESS_EXPIRES}
-      - REFRESH_EXPIRES=${REFRESH_EXPIRES}
     networks:
       - app-network
 
@@ -71,7 +56,6 @@ services:
       kafka:
         condition: service_healthy
     environment:
-      - NODE_TLS_REJECT_UNAUTHORIZED=0
       - DATABASE_URL=${POST_DATABASE_URL}
     command: sh -c "npm run migrate up"
     networks:
@@ -84,30 +68,25 @@ services:
   post-service-1:
     build: ./post-service
     container_name: post-service-1
+    ports:
+      - "3002:3002"
     depends_on:
       post-migrate:
         condition: service_completed_successfully
     environment:
       - PORT=3002
-      - NODE_ENV=${NODE_ENV}
-      - DATABASE_URL=${POST_DATABASE_URL}
-      - CORS_ALLOWED_ORIGIN=${CORS_ALLOWED_ORIGIN}
-      - KAFKA_BROKERS=${KAFKA_BROKERS}
     networks:
       - app-network
 
   post-service-2:
     build: ./post-service
     container_name: post-service-2
+    # không expose ra host, vì chỉ cần 1 node cho NGINX
     depends_on:
       post-migrate:
         condition: service_completed_successfully
     environment:
       - PORT=3002
-      - NODE_ENV=${NODE_ENV}
-      - DATABASE_URL=${POST_DATABASE_URL}
-      - CORS_ALLOWED_ORIGIN=${CORS_ALLOWED_ORIGIN}
-      - KAFKA_BROKERS=${KAFKA_BROKERS}
     networks:
       - app-network
 
@@ -117,20 +96,13 @@ services:
   community-service:
     build: ./community-service
     container_name: community-service
+    ports:
+      - "3003:3003"
     depends_on:
       kafka:
         condition: service_healthy
     environment:
       - PORT=3003
-      - DATABASE_URL=${COMMUNITY_DATABASE_URL}
-      - PG_HOST=${COMMUNITY_PG_HOST}
-      - PG_PORT=${COMMUNITY_PG_PORT}
-      - PG_USER=${COMMUNITY_PG_USER}
-      - PG_PASSWORD=${COMMUNITY_PG_PASSWORD}
-      - PG_DATABASE=${COMMUNITY_PG_DATABASE}
-      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
-      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
-      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
     networks:
       - app-network
 
@@ -140,17 +112,13 @@ services:
   notification-service:
     build: ./notification-service
     container_name: notification-service
+    ports:
+      - "3004:3004"
     depends_on:
       kafka:
         condition: service_healthy
     environment:
       - PORT=3004
-      - DATABASE_URL=${NOTIFICATION_DATABASE_URL}
-      - NODE_ENV=${NODE_ENV}
-      - KAFKA_BROKERS=${KAFKA_BROKERS}
-      - KAFKA_CLIENT_ID=${KAFKA_CLIENT_ID}
-      - KAFKA_GROUP_ID=${KAFKA_GROUP_ID}
-      - CORS_ORIGINS=${CORS_ALLOWED_ORIGIN}
     networks:
       - app-network
 
