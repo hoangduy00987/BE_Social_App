@@ -1,7 +1,9 @@
+version: "3.9"
+
 services:
 
   # ==========================
-  # ZOOKEEPER + KAFKA
+  # ZOOKEEPER (Healthy)
   # ==========================
   zookeeper:
     image: confluentinc/cp-zookeeper:7.8.0
@@ -20,7 +22,9 @@ services:
       retries: 10
       start_period: 20s
 
-
+  # ==========================
+  # KAFKA (Healthy)
+  # ==========================
   kafka:
     image: confluentinc/cp-kafka:7.8.0
     container_name: notifications_kafka
@@ -33,12 +37,18 @@ services:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD", "bash", "-c", "kafka-broker-api-versions --bootstrap-server localhost:9092 > /dev/null 2>&1"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+      start_period: 20s
 
   # ==========================
   # USER SERVICE
@@ -50,11 +60,16 @@ services:
       - "3000:3000"
     environment:
       - PORT=3000
+      - DATABASE_URL=${USER_DATABASE_URL}
+      - ACCESS_SECRET=${ACCESS_SECRET}
+      - REFRESH_SECRET=${REFRESH_SECRET}
+      - ACCESS_EXPIRES=${ACCESS_EXPIRES}
+      - REFRESH_EXPIRES=${REFRESH_EXPIRES}
     networks:
       - app-network
 
   # ==========================
-  # POST MIGRATION
+  # POST MIGRATION (RUN FIRST)
   # ==========================
   post-migrate:
     build: ./post-service
@@ -64,13 +79,14 @@ services:
         condition: service_healthy
     environment:
       - DATABASE_URL=${POST_DATABASE_URL}
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
     command: sh -c "npm run migrate up"
     networks:
       - app-network
     restart: "no"
 
   # ==========================
-  # POST SERVICES
+  # POST SERVICES (2 instances)
   # ==========================
   post-service-1:
     build: ./post-service
@@ -82,20 +98,28 @@ services:
         condition: service_completed_successfully
     environment:
       - PORT=3002
+      - NODE_ENV=${NODE_ENV}
+      - DATABASE_URL=${POST_DATABASE_URL}
+      - CORS_ALLOWED_ORIGIN=${CORS_ALLOWED_ORIGIN}
+      - KAFKA_BROKERS=${KAFKA_BROKERS}
     networks:
       - app-network
 
   post-service-2:
     build: ./post-service
     container_name: post-service-2
-    # không expose ra host, vì chỉ cần 1 node cho NGINX
     depends_on:
       post-migrate:
         condition: service_completed_successfully
     environment:
       - PORT=3002
+      - NODE_ENV=${NODE_ENV}
+      - DATABASE_URL=${POST_DATABASE_URL}
+      - CORS_ALLOWED_ORIGIN=${CORS_ALLOWED_ORIGIN}
+      - KAFKA_BROKERS=${KAFKA_BROKERS}
     networks:
       - app-network
+    # không expose port để avoid conflict, load-balancing chỉ qua service-1
 
   # ==========================
   # COMMUNITY SERVICE
@@ -110,6 +134,15 @@ services:
         condition: service_healthy
     environment:
       - PORT=3003
+      - DATABASE_URL=${COMMUNITY_DATABASE_URL}
+      - PG_HOST=${COMMUNITY_PG_HOST}
+      - PG_PORT=${COMMUNITY_PG_PORT}
+      - PG_USER=${COMMUNITY_PG_USER}
+      - PG_PASSWORD=${COMMUNITY_PG_PASSWORD}
+      - PG_DATABASE=${COMMUNITY_PG_DATABASE}
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
     networks:
       - app-network
 
@@ -126,9 +159,18 @@ services:
         condition: service_healthy
     environment:
       - PORT=3004
+      - DATABASE_URL=${NOTIFICATION_DATABASE_URL}
+      - NODE_ENV=${NODE_ENV}
+      - KAFKA_BROKERS=${KAFKA_BROKERS}
+      - KAFKA_CLIENT_ID=${KAFKA_CLIENT_ID}
+      - KAFKA_GROUP_ID=${KAFKA_GROUP_ID}
+      - CORS_ORIGINS=${CORS_ALLOWED_ORIGIN}
     networks:
       - app-network
 
+# ==========================
+# NETWORK
+# ==========================
 networks:
   app-network:
     driver: bridge
