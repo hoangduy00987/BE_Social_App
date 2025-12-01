@@ -9,6 +9,7 @@ interface EnvConfig {
   DB_USER?: string;
   DB_PASS?: string;
   DB_NAME?: string;
+  ACCESS_SECRET?: string;
   CORS_ALLOWED_ORIGIN: string[];
   KAFKA_BROKERS: string;
 }
@@ -21,6 +22,7 @@ const envConfig: EnvConfig = {
   DB_USER: process.env.DB_USER,
   DB_PASS: process.env.DB_PASSWORD,
   DB_NAME: process.env.DB_NAME,
+  ACCESS_SECRET: process.env.ACCESS_SECRET,
   CORS_ALLOWED_ORIGIN: process.env.CORS_ALLOWED_ORIGIN?.split(",") || [
     "http://localhost:3000",
     "http://localhost:8081",
