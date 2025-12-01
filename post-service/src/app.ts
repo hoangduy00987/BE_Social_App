@@ -4,7 +4,7 @@ import corsOptions from "./config/cors.config.js";
 import routes from "./routes/index.js";
 import errorHandler from "./shared/middlewares/error.middleware.js";
 import { httpRequestLogger } from "./shared/middlewares/logger.middleware.js";
-import { clerkMiddleware } from "@clerk/express";
+// import { clerkMiddleware } from "@clerk/express";
 import notFoundHandler from "./shared/utils/404.js";
 // import { producer } from "./lib/kafkaClient.js";
 
@@ -18,8 +18,8 @@ app.use(express.urlencoded({ extended: true }));
 // Morgan middleware for HTTP request logging
 app.use(httpRequestLogger);
 
-// Clerk middleware
-app.use(clerkMiddleware());
+// // Clerk middleware
+// app.use(clerkMiddleware());
 
 // Routes
 app.use("/api", routes);
