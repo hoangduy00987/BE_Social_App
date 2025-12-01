@@ -2,7 +2,7 @@
 import { randomInt } from "crypto";
 import { Request, Response, NextFunction } from "express";
 import jwt from 'jsonwebtoken';
-import envConfig from "../../config/env.config";
+import envConfig from "../../config/env.config.js";
 
 type JwtPayload = {
   sub: number;
