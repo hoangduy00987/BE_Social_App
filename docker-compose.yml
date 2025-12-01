@@ -1,7 +1,6 @@
 version: "3.9"
 
 services:
-
   # ==========================
   # ZOOKEEPER (Healthy)
   # ==========================
@@ -44,7 +43,13 @@ services:
     networks:
       - app-network
     healthcheck:
-      test: ["CMD", "bash", "-c", "kafka-broker-api-versions --bootstrap-server localhost:9092 > /dev/null 2>&1"]
+      test:
+        [
+          "CMD",
+          "bash",
+          "-c",
+          "kafka-broker-api-versions --bootstrap-server localhost:9092 > /dev/null 2>&1",
+        ]
       interval: 5s
       timeout: 10s
       retries: 10
@@ -100,6 +105,7 @@ services:
       - PORT=3002
       - NODE_ENV=${NODE_ENV}
       - DATABASE_URL=${POST_DATABASE_URL}
+      - ACCESS_SECRET=${ACCESS_SECRET}
       - CORS_ALLOWED_ORIGIN=${CORS_ALLOWED_ORIGIN}
       - KAFKA_BROKERS=${KAFKA_BROKERS}
     networks:
@@ -115,6 +121,7 @@ services:
       - PORT=3002
       - NODE_ENV=${NODE_ENV}
       - DATABASE_URL=${POST_DATABASE_URL}
+      - ACCESS_SECRET=${ACCESS_SECRET}
       - CORS_ALLOWED_ORIGIN=${CORS_ALLOWED_ORIGIN}
       - KAFKA_BROKERS=${KAFKA_BROKERS}
     networks:
@@ -161,6 +168,7 @@ services:
       - PORT=3004
       - DATABASE_URL=${NOTIFICATION_DATABASE_URL}
       - NODE_ENV=${NODE_ENV}
+      - ACCESS_SECRET=${ACCESS_SECRET}
       - KAFKA_BROKERS=${KAFKA_BROKERS}
       - KAFKA_CLIENT_ID=${KAFKA_CLIENT_ID}
       - KAFKA_GROUP_ID=${KAFKA_GROUP_ID}
