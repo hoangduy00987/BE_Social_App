@@ -31,7 +31,9 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction) 
   }
 
   try {
-    const payload = jwt.verify(token, env.jwt.accessSecret) as JwtPayload;
+    // jwt.verify returns string | JwtPayload, need to cast properly
+    const decoded = jwt.verify(token, env.jwt.accessSecret);
+    const payload = decoded as unknown as JwtPayload;
 
     (req as any).user = {
       id: payload.sub,
