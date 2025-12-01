@@ -11,6 +11,9 @@ export const env = {
 	port: getNumber(process.env.PORT, 3000),
 	nodeEnv: process.env.NODE_ENV ?? 'development',
 	databaseUrl: process.env.DATABASE_URL ?? '',
+	jwt: {
+		accessSecret: process.env.ACCESS_SECRET ?? '',
+	},
 	kafka: {
 		brokers: (process.env.KAFKA_BROKERS ?? 'localhost:9092').split(',').map(s => s.trim()).filter(Boolean),
 		clientId: process.env.KAFKA_CLIENT_ID ?? 'notifications-service',
@@ -22,5 +25,8 @@ export const env = {
 export function assertEnv() {
 	if (!env.databaseUrl) {
 		throw new Error('DATABASE_URL is required');
+	}
+	if (!env.jwt.accessSecret) {
+		throw new Error('ACCESS_SECRET is required for JWT verification');
 	}
 }

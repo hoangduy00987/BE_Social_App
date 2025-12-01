@@ -1,11 +1,9 @@
 import { logger } from "../shared/logger.js";
-import {
-  createNotification,
-  isEventProcessed,
-  markEventProcessed,
-} from "../modules/notifications/notificationRepo.js";
+import { NotificationService } from "../services/notification.service.js";
 import { emitNotificationToUser } from "../realtime/websocket.js";
 import { toJson } from "../shared/utils.js";
+
+const notificationService = new NotificationService();
 
 export type EventEnvelope = {
   eventId: string;
@@ -18,7 +16,7 @@ export type EventEnvelope = {
 
 export async function routeEvent(evt: EventEnvelope) {
   if (!evt?.eventId || !evt?.eventType) return;
-  if (await isEventProcessed(evt.eventId)) {
+  if (await notificationService.isEventProcessed(evt.eventId)) {
     return;
   }
   try {
@@ -29,7 +27,7 @@ export async function routeEvent(evt: EventEnvelope) {
       default:
         logger.debug({ evt }, "Unhandled eventType");
     }
-    await markEventProcessed(evt.eventId);
+    await notificationService.markEventProcessed(evt.eventId);
   } catch (err) {
     logger.error({ err, evt }, "Failed to process event");
     throw err;
@@ -41,7 +39,7 @@ async function handleCommentCreated(evt: EventEnvelope) {
   const ownerUserId = String((evt.target as any)?.ownerUserId ?? "");
   if (!ownerUserId) return;
 
-  const notification = await createNotification({
+  const notification = await notificationService.createNotification({
     userId: ownerUserId,
     type: "comment_created",
     title: "New comment on your post",

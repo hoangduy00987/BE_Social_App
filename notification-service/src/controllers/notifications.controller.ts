@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
-import * as repo from '../../modules/notifications/notificationRepo.js';
-import { emitNotificationUpdateToUser } from '../../realtime/websocket.js';
+import { NotificationService } from '../services/notification.service.js';
+
+const notificationService = new NotificationService();
 
 /**
  * @swagger
@@ -49,12 +50,17 @@ import { emitNotificationUpdateToUser } from '../../realtime/websocket.js';
  *               $ref: '#/components/schemas/Error'
  */
 export async function list(req: Request, res: Response) {
-	// In real app, get userId from auth; for now accept query param
-	const userId = (req.query.userId as string) ?? '';
-	if (!userId) return res.status(400).json({ error: 'userId required' });
+	const authUser = (req as any).user as { id?: number } | undefined;
+	const userId =
+		(req.query.userId as string) ??
+		(authUser?.id != null ? String(authUser.id) : '');
+
+	if (!userId) {
+		return res.status(400).json({ error: 'userId required' });
+	}
 	const limit = Number(req.query.limit ?? 20);
 	const cursor = (req.query.cursor as string) || undefined;
-	const result = await repo.listNotifications(userId, Math.min(limit, 100), cursor);
+	const result = await notificationService.listNotifications(userId, Math.min(limit, 100), cursor);
 	res.json(result);
 }
 
@@ -94,15 +100,16 @@ export async function list(req: Request, res: Response) {
  *               $ref: '#/components/schemas/Error'
  */
 export async function markRead(req: Request, res: Response) {
-	const userId = (req.body.userId as string) ?? '';
+	const authUser = (req as any).user as { id?: number } | undefined;
+	const userId =
+		(req.body.userId as string) ??
+		(authUser?.id != null ? String(authUser.id) : '');
 	const id = req.params.id;
-	if (!userId) return res.status(400).json({ error: 'userId required' });
+	if (!userId) {
+		return res.status(400).json({ error: 'userId required' });
+	}
 	
-	// Update database
-	await repo.markNotificationRead(userId, id);
-	
-	// Emit real-time update via WebSocket
-	emitNotificationUpdateToUser(userId, id, { read: true });
+	await notificationService.markNotificationRead(userId, id);
 	
 	res.status(204).end();
 }
@@ -136,14 +143,17 @@ export async function markRead(req: Request, res: Response) {
  *               $ref: '#/components/schemas/Error'
  */
 export async function markAll(req: Request, res: Response) {
-	const userId = (req.body.userId as string) ?? '';
-	if (!userId) return res.status(400).json({ error: 'userId required' });
+	const authUser = (req as any).user as { id?: number } | undefined;
+	const userId =
+		(req.body.userId as string) ??
+		(authUser?.id != null ? String(authUser.id) : '');
+
+	if (!userId) {
+		return res.status(400).json({ error: 'userId required' });
+	}
 	
-	// Update database
-	await repo.markAllRead(userId);
-	
-	// Emit real-time update for all notifications
-	emitNotificationUpdateToUser(userId, 'all', { read: true });
+	await notificationService.markAllRead(userId);
 	
 	res.status(204).end();
 }
+

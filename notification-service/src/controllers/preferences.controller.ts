@@ -1,5 +1,7 @@
 import { Request, Response } from 'express';
-import * as repo from '../../modules/preferences/preferencesRepo.js';
+import { PreferencesService } from '../services/preferences.service.js';
+
+const preferencesService = new PreferencesService();
 
 /**
  * @swagger
@@ -29,10 +31,16 @@ import * as repo from '../../modules/preferences/preferencesRepo.js';
  *               $ref: '#/components/schemas/Error'
  */
 export async function get(req: Request, res: Response) {
-	const userId = (req.query.userId as string) ?? '';
-	if (!userId) return res.status(400).json({ error: 'userId required' });
-	const prefs = await repo.getPreferences(userId);
-	res.json(prefs ?? { userId, inApp: true, email: false, push: false, types: {}, quietHours: {}, language: 'en' });
+	const authUser = (req as any).user as { id?: number } | undefined;
+	const userId =
+		(req.query.userId as string) ??
+		(authUser?.id != null ? String(authUser.id) : '');
+
+	if (!userId) {
+		return res.status(400).json({ error: 'userId required' });
+	}
+	const prefs = await preferencesService.getPreferences(userId);
+	res.json(prefs);
 }
 
 /**
@@ -80,8 +88,15 @@ export async function get(req: Request, res: Response) {
  *               $ref: '#/components/schemas/Error'
  */
 export async function put(req: Request, res: Response) {
-	const userId = (req.body.userId as string) ?? '';
-	if (!userId) return res.status(400).json({ error: 'userId required' });
-	const updated = await repo.upsertPreferences(userId, req.body);
+	const authUser = (req as any).user as { id?: number } | undefined;
+	const userId =
+		(req.body.userId as string) ??
+		(authUser?.id != null ? String(authUser.id) : '');
+
+	if (!userId) {
+		return res.status(400).json({ error: 'userId required' });
+	}
+	const updated = await preferencesService.upsertPreferences(userId, req.body);
 	res.json(updated);
 }
+

@@ -1,12 +1,16 @@
 import { Router } from 'express';
-import * as notifications from './controllers/notificationsController.js';
-import * as preferences from './controllers/preferencesController.js';
-import { getConnectedUsersCount, emitNotificationToUser, emitNotificationUpdateToUser } from '../realtime/websocket.js';
-import { createNotification } from '../modules/notifications/notificationRepo.js';
+import * as notifications from './controllers/notifications.controller.js';
+import * as preferences from './controllers/preferences.controller.js';
+import { NotificationService } from './services/notification.service.js';
+import { emitNotificationToUser, getConnectedUsersCount } from './realtime/websocket.js';
+import { authMiddleware } from './shared/middlewares/auth.middleware.js';
+
+const notificationService = new NotificationService();
 
 export function createRoutes() {
 	const router = Router();
 
+	// Public routes
 	router.get('/health', (_req, res) => {
 		res.json({ status: 'ok' });
 	});
@@ -18,7 +22,8 @@ export function createRoutes() {
 		});
 	});
 
-	router.post('/test-event', async (req, res) => {
+	// Test route 
+	router.post('/test-event', authMiddleware, async (req, res) => {
 		try {
 			const { userId } = req.body;
 			if (!userId) {
@@ -26,7 +31,7 @@ export function createRoutes() {
 			}
 
 			// Create test notification
-			const notification = await createNotification({
+			const notification = await notificationService.createNotification({
 				userId: userId,
 				type: 'test_notification',
 				title: 'Test WebSocket Notification',
@@ -48,12 +53,14 @@ export function createRoutes() {
 		}
 	});
 
-	router.get('/notifications', notifications.list);
-	router.patch('/notifications/:id/read', notifications.markRead);
-	router.patch('/notifications/read-all', notifications.markAll);
+	// Protected routes: yêu cầu access_token hợp lệ
+	router.get('/notifications', authMiddleware, notifications.list);
+	router.patch('/notifications/:id/read', authMiddleware, notifications.markRead);
+	router.patch('/notifications/read-all', authMiddleware, notifications.markAll);
 
-	router.get('/preferences', preferences.get);
-	router.put('/preferences', preferences.put);
+	router.get('/preferences', authMiddleware, preferences.get);
+	router.put('/preferences', authMiddleware, preferences.put);
 
 	return router;
 }
+

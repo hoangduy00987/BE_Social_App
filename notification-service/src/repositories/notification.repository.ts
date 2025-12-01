@@ -1,5 +1,5 @@
 import { Prisma, Notification } from "@prisma/client";
-import { getPrisma } from "../../shared/db.js";
+import { getPrisma } from "../shared/db.js";
 
 export async function listNotifications(
   userId: string,
@@ -54,3 +54,4 @@ export async function markEventProcessed(eventId: string) {
   const prisma = getPrisma();
   await prisma.processedEvent.create({ data: { eventId } });
 }
+

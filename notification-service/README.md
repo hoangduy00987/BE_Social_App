@@ -26,12 +26,10 @@ npm run dev
 ```
 
 ### API cơ bản
-- `GET /health` kiểm tra sức khỏe.
-- `GET /notifications` danh sách thông báo.
-- `GET /api-docs` Swagger API documentation.
+- `GET /health` 
+- `GET /notifications` 
 
 ### Tech
 - Node.js + Express + Prisma (PostgreSQL)
 - Kafka (kafkajs)
-- Swagger UI cho API documentation
 
