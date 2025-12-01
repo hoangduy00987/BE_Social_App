@@ -33,7 +33,6 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction) 
   try {
     const payload = jwt.verify(token, env.jwt.accessSecret) as JwtPayload;
 
-    // Attach user info to request (giữ đơn giản, không cần type augmentation phức tạp)
     (req as any).user = {
       id: payload.sub,
       email: payload.email,
