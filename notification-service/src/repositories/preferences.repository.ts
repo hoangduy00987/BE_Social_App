@@ -1,6 +1,6 @@
 import { UserPreference } from "@prisma/client";
-import { getPrisma } from "../../shared/db.js";
-import { toJson } from "../../shared/utils.js";
+import { getPrisma } from "../shared/db.js";
+import { toJson } from "../shared/utils.js";
 
 export async function getPreferences(userId: string) {
   const prisma = getPrisma();
@@ -33,3 +33,4 @@ export async function upsertPreferences(
     },
   });
 }
+
