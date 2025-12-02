@@ -70,6 +70,7 @@ services:
       - REFRESH_SECRET=${REFRESH_SECRET}
       - ACCESS_EXPIRES=${ACCESS_EXPIRES}
       - REFRESH_EXPIRES=${REFRESH_EXPIRES}
+      - CORS_ORIGINS=${CORS_ALLOWED_ORIGIN}
     networks:
       - app-network
 
