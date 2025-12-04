@@ -124,5 +124,21 @@ export class UserService {
     };
   }
 
+  async getUsersBatch(ids: number[]) {
+    const users = await this.userModel.findManyUsers(ids);
+
+    // Convert to map for faster lookup
+    const result: Record<number, any> = {};
+    users.forEach(u => {
+      result[u.id] = {
+        id: u.id,
+        email: u.email,
+        full_name: u.profile?.full_name ?? null,
+        avatar: u.profile?.avatar ?? null
+      };
+    });
+
+    return result;
+  }
 
 }

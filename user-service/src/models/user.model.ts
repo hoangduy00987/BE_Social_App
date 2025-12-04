@@ -40,4 +40,13 @@ async updateProfile(id: number, data: any) {
       include: { profile: true },
     });
   }
+
+  async findManyUsers(ids: number[]) {
+    return this.prisma.user.findMany({
+      where: { id: { in: ids } },
+      include: {
+        profile: true,
+      }
+    });
+  }
 }

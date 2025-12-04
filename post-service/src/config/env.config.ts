@@ -12,6 +12,9 @@ interface EnvConfig {
   ACCESS_SECRET?: string;
   CORS_ALLOWED_ORIGIN: string[];
   KAFKA_BROKERS: string;
+  REDIS_URL: string;
+  USER_SERVICE_URL: string;
+  COMMUNITY_SERVICE_URL: string;
 }
 
 const envConfig: EnvConfig = {
@@ -28,6 +31,9 @@ const envConfig: EnvConfig = {
     "http://localhost:8081",
   ],
   KAFKA_BROKERS: process.env.KAFKA_BROKERS || "localhost:9093",
+  REDIS_URL: process.env.REDIS_URL || "redis://localhost:6379",
+  USER_SERVICE_URL: process.env.USER_SERVICE_URL || "http://localhost:3000",
+  COMMUNITY_SERVICE_URL: process.env.COMMUNITY_SERVICE_URL || "http://localhost:3003"
 };
 
 export default envConfig;

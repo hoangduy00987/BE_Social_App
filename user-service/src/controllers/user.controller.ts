@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Get, Req, UseGuards, UsePipes, ValidationPipe, Put, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Body, Controller, Post, Get, Req, UseGuards, UsePipes, ValidationPipe, Put, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
 import { UserService } from '../services/user.service';
 import { IsEmail, IsNotEmpty, MinLength, IsString, IsBoolean, IsOptional } from 'class-validator';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -83,4 +83,14 @@ export class UserController {
 
 
   }
+
+  @Post("batch")
+  async getUsersBatch(@Body("ids") ids: number[]) {
+    if (!ids || !Array.isArray(ids)) {
+      throw new BadRequestException("ids must be an array");
+    }
+
+    return this.userService.getUsersBatch(ids);
+  }
+
 }
