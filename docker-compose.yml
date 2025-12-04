@@ -93,7 +93,7 @@ services:
       - CORS_ORIGINS=${CORS_ALLOWED_ORIGIN}
       - BASE_URL=${BASE_URL}
     volumes:
-      - ./user-service/uploads:/app/uploads
+      - /var/www/uploads:/app/uploads
     networks:
       - app-network
 
