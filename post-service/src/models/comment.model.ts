@@ -1,7 +1,7 @@
 export interface Comment {
   id: number;
   post_id: number;
-  author_id: number | string;
+  author_id: number;
   content: string;
   parent_comment_id: number;
   is_deleted: boolean;

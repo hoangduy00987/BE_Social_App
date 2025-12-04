@@ -7,6 +7,8 @@ import { PostMedia } from "../models/post-media.model.js";
 import { PostMediaRepository } from "../repositories/post-media.repository.js";
 import { SavedPost } from "../models/saved-post.model.js";
 import { SavedPostRepository } from "../repositories/saved-post.repository.js";
+import { redis } from "../shared/middlewares/cache.middleware.js";
+import envConfig from "../config/env.config.js";
 
 export class PostService {
   private postRepo;
@@ -32,13 +34,28 @@ export class PostService {
     const postIds = result.posts.map((p) => p.id);
     const media = await this.postMediaRepo.getByPostIds(postIds);
 
+    const userIds = [...new Set(result.posts.map(p => p.author_id))];
+    const communityIds = [...new Set(result.posts.map(p => p.subreddit_id!))];
+
+    // Fetch enriched info (cached)
+    const [users, communities] = await Promise.all([
+      this.getUsersInfo(userIds),
+      this.getCommunitiesInfo(communityIds),
+    ]);
+
+    const enriched = result.posts.map(p => ({
+      ...p,
+      author: users[p.author_id] ?? null,
+      community: communities[p.subreddit_id!] ?? null
+    }));
+
     const mediaMap = media.reduce((acc, m) => {
       acc[m.post_id] = acc[m.post_id] || [];
       acc[m.post_id].push(m);
       return acc;
     }, {});
 
-    const mappedPosts = result.posts.map((p) => ({
+    const mappedPosts = enriched.map((p) => ({
       ...p,
       media: mediaMap[p.id] || [],
     }));
@@ -62,6 +79,44 @@ export class PostService {
           media: mediaMap[post.id] || [],
         }
       : null;
+  }
+
+  async getUsersInfo(ids: number[]) {
+    const cacheKey = `users:${ids.join(",")}`;
+    const cached = await redis.get(cacheKey);
+
+    if (cached) return JSON.parse(cached);
+
+    const res = await fetch(`${envConfig.USER_SERVICE_URL}/users/batch`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids }),
+    });
+
+    const data = await res.json();
+
+    await redis.set(cacheKey, JSON.stringify(data), "EX", 300); // TTL 5 phút
+
+    return data;
+  }
+
+  async getCommunitiesInfo(ids: number[]) {
+    const cacheKey = `communities:${ids.join(",")}`;
+    const cached = await redis.get(cacheKey);
+
+    if (cached) return JSON.parse(cached);
+
+    const res = await fetch(`${envConfig.COMMUNITY_SERVICE_URL}/communities/api/community/batch`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids }),
+    });
+
+    const data = await res.json();
+
+    await redis.set(cacheKey, JSON.stringify(data), "EX", 300);
+
+    return data;
   }
 
   async createPostWithMedia(postData: Partial<Post>, mediaList: PostMedia[]) {

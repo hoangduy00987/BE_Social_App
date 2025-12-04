@@ -1,6 +1,6 @@
 export interface Post {
   id: number;
-  author_id: number | string;
+  author_id: number;
   subreddit_id?: number;
   title: string;
   content: string;

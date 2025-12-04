@@ -34,8 +34,10 @@ export class CommunityController {
 
   static async getById(req: Request, res: Response) {
     try {
-      const name = req.params.id;
-      const community = await CommunityService.getCommunityById(name);
+      const community_id = req.params.id;
+      const community = await CommunityService.getCommunityById(
+        Number(community_id)
+      );
       res.json(community);
     } catch (err: any) {
       res.status(404).json({ error: err.message });
@@ -119,5 +121,14 @@ export class CommunityController {
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
+  }
+
+  static async getCommunitiesBatch(req: Request, res: Response) {
+    const { ids } = req.body;
+    if (!ids || !Array.isArray(ids)) {
+      return res.status(400).json({ message: "ids must be an array" });
+    }
+
+    return await CommunityService.getCommunitiesBatch(ids as number[]);
   }
 }
