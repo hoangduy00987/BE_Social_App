@@ -14,6 +14,7 @@ RUN npm install --omit=dev
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/uploads ./uploads
 
 COPY entrypoint.sh ./
 RUN chmod +x entrypoint.sh
