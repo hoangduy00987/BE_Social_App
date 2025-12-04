@@ -94,6 +94,7 @@ export class PostService {
     });
 
     const data = await res.json();
+    console.log("data:", data);
 
     await redis.set(cacheKey, JSON.stringify(data), "EX", 300); // TTL 5 phút
 
@@ -113,6 +114,7 @@ export class PostService {
     });
 
     const data = await res.json();
+    console.log("data:", data);
 
     await redis.set(cacheKey, JSON.stringify(data), "EX", 300);
 
