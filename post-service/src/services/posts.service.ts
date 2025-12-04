@@ -135,7 +135,7 @@ export class PostService {
     return data;
   }
 
-  async createPostWithMedia(postData: Partial<Post>, mediaList: PostMedia[]) {
+  async createPostWithMedia(postData: Partial<Post>, mediaList: Partial<PostMedia>[]) {
     const db = PostgresClient.getInstance();
 
     const client = await db.connect(); // transaction

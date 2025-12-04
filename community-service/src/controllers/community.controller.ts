@@ -125,7 +125,6 @@ export class CommunityController {
 
   static async getCommunitiesBatch(req: Request, res: Response) {
     const { ids } = req.body;
-    console.log("ids:", ids);
     if (!ids || !Array.isArray(ids)) {
       return res.status(400).json({ message: "ids must be an array" });
     }

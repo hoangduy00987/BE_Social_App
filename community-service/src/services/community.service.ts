@@ -49,9 +49,7 @@ export class CommunityService {
   }
 
   static async getCommunitiesBatch(ids: number[]) {
-    console.log("start");
     const communities = await CommunityModel.findManyCommunites(ids);
-    console.log("communities:", communities);
 
     const result: Record<number, any> = {};
 
@@ -65,7 +63,6 @@ export class CommunityService {
       };
     });
 
-    console.log("result:", result);
     return result;
   }
 }

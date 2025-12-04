@@ -91,6 +91,9 @@ services:
       - ACCESS_EXPIRES=${ACCESS_EXPIRES}
       - REFRESH_EXPIRES=${REFRESH_EXPIRES}
       - CORS_ORIGINS=${CORS_ALLOWED_ORIGIN}
+      - BASE_URL=${BASE_URL}
+    volumes:
+      - ./user-service/uploads:/app/uploads
     networks:
       - app-network
 
@@ -139,6 +142,9 @@ services:
       - REDIS_URL=${REDIS_URL}
       - USER_SERVICE_URL=${USER_SERVICE_URL}
       - COMMUNITY_SERVICE_URL=${COMMUNITY_SERVICE_URL}
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
     networks:
       - app-network
 
@@ -165,6 +171,9 @@ services:
       - REDIS_URL=${REDIS_URL}
       - USER_SERVICE_URL=${USER_SERVICE_URL}
       - COMMUNITY_SERVICE_URL=${COMMUNITY_SERVICE_URL}
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
     networks:
       - app-network
     # không expose port để avoid conflict, load-balancing chỉ qua service-1
