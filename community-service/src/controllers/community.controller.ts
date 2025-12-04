@@ -130,6 +130,9 @@ export class CommunityController {
       return res.status(400).json({ message: "ids must be an array" });
     }
 
-    return await CommunityService.getCommunitiesBatch(ids as number[]);
+    const communities = await CommunityService.getCommunitiesBatch(
+      ids as number[]
+    );
+    res.json(communities);
   }
 }
