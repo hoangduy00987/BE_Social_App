@@ -138,7 +138,7 @@ export class UserService {
         id: u.id,
         email: u.email,
         full_name: u.profile?.full_name ?? null,
-        avatar: u.profile?.avatar ?? null
+        avatar: u.profile?.avatar ? `${process.env.BASE_URL}/uploads/avatar/${u.profile?.avatar}` : null
       };
     });
 
