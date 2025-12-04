@@ -67,18 +67,33 @@ export class PostService {
     const post = await this.postRepo.findById(id);
     const media = await this.postMediaRepo.getByPostId(id);
 
+    if (!post) return null
+
+    const userId = post.author_id;
+    const communityId = post.subreddit_id;
+
+    // Fetch enriched info (cached)
+    const [users, communities] = await Promise.all([
+      this.getUsersInfo([userId]),
+      this.getCommunitiesInfo([communityId!]),
+    ]);
+
+    const enriched = {
+      ...post,
+      author: users[post.author_id] ?? null,
+      community: communities[post.subreddit_id!] ?? null
+    }
+
     const mediaMap = media.reduce((acc, m) => {
       acc[m.post_id] = acc[m.post_id] || [];
       acc[m.post_id].push(m);
       return acc;
     }, {});
 
-    return post
-      ? {
-          ...post,
-          media: mediaMap[post.id] || [],
-        }
-      : null;
+    return {
+      ...enriched,
+      media: mediaMap[enriched.id] || [],
+    }
   }
 
   async getUsersInfo(ids: number[]) {
@@ -94,7 +109,6 @@ export class PostService {
     });
 
     const data = await res.json();
-    console.log("data:", data);
 
     await redis.set(cacheKey, JSON.stringify(data), "EX", 300); // TTL 5 phút
 
@@ -107,7 +121,7 @@ export class PostService {
 
     if (cached) return JSON.parse(cached);
 
-    const res = await fetch(`${envConfig.COMMUNITY_SERVICE_URL}/communities/api/community/batch`, {
+    const res = await fetch(`${envConfig.COMMUNITY_SERVICE_URL}/api/community/batch`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ids }),
