@@ -6,12 +6,12 @@ import { join } from 'path';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  // app.useStaticAssets(join(__dirname, '..', 'uploads'), {
-  //   prefix: '/uploads/',
-  // });
-  app.useStaticAssets('/app/uploads', {
+  const uploadsPath = join(__dirname, '..', 'uploads');
+  console.log('📁 Serving static files from:', uploadsPath);
+  app.useStaticAssets(uploadsPath, {
     prefix: '/uploads/',
   });
+  
   // Enable CORS with environment variables
   const allowedOrigins = process.env.CORS_ORIGINS?.split(',') || [];
 
