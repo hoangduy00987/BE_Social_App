@@ -206,7 +206,6 @@ export class CommunityModel {
         },
       },
     });
-    console.log("models:", communities);
 
     return communities;
   }

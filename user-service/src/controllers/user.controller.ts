@@ -47,7 +47,14 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   async getProfile(@Req() req) {
-    return this.userService.getProfile(req.user.id);
+    const user = await this.userService.getProfile(req.user.id);
+
+    const profile = {
+      ...user.profile,
+      avatar: user.profile.avatar ? `${process.env.BASE_URL}/uploads/avatar/${user.profile.avatar}` : ''
+    }
+    const avtUser = { ...user, profile }
+    return avtUser;
   }
   
   @Put('profile')

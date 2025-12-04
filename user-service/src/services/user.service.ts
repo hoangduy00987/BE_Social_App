@@ -43,7 +43,7 @@ export class UserService {
     return this.generateAuthResponse(user);
   }
 
-  async getProfile(userId: number) {
+  async getProfile(userId: number): Promise<any> {
     const user = await this.userModel.findById(userId);
 
     if (!user) {
@@ -100,7 +100,11 @@ export class UserService {
       avatar: avatar,
     });
 
-    return updatedProfile;
+    const udProfile = {
+      ...updatedProfile,
+      avatar: updatedProfile.avatar ? `${process.env.BASE_URL}/uploads/avatar/${updatedProfile.avatar}` : ''
+    }
+    return udProfile;
   }
 
 

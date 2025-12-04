@@ -50,3 +50,20 @@ async updateProfile(id: number, data: any) {
     });
   }
 }
+
+export type ProfileUser = {
+  id: number;
+  email: string;
+  is_admin: boolean;
+  updated_at: Date;
+  created_at: Date;
+  profile: {
+    id: number;
+    user_id: number;
+    full_name: string;
+    avatar: string | null;
+    gender: string | null;
+    updated_at: Date;
+    created_at: Date;
+  }
+}

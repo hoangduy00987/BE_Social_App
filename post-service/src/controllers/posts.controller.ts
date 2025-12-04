@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { PostService } from "../services/posts.service.js";
+import cloudinary from "../config/cloudinary.js";
 
 export class PostController {
   private postService: PostService;
@@ -23,8 +24,25 @@ export class PostController {
   };
 
   create = async (req: Request, res: Response) => {
-    const { title, content, subreddit_id, media } = req.body;
+    const { title, content, subreddit_id, media_type } = req.body;
+    const file = req.file;
     const author_id = req.user?.userId;
+    
+    let fileUrl = "";
+    if (file) {
+      const b64 = Buffer.from(file.buffer).toString("base64");
+      const dataURI = `data:${file.mimetype};base64,${b64}`;
+
+      const result = await cloudinary.uploader.upload(dataURI, {
+        resource_type: media_type === "video" ? "video" : "auto",
+        folder: "post-assets",
+      });
+      fileUrl = result.secure_url;
+    }
+
+    const media = [
+      { media_type, media_url: fileUrl }
+    ]
     const newPost = await this.postService.createPostWithMedia(
       { title, content, author_id, subreddit_id },
       media,

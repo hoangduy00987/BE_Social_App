@@ -15,6 +15,9 @@ interface EnvConfig {
   REDIS_URL: string;
   USER_SERVICE_URL: string;
   COMMUNITY_SERVICE_URL: string;
+  CLOUDINARY_CLOUD_NAME?: string;
+  CLOUDINARY_API_KEY?: string;
+  CLOUDINARY_API_SECRET?: string;
 }
 
 const envConfig: EnvConfig = {
@@ -33,7 +36,10 @@ const envConfig: EnvConfig = {
   KAFKA_BROKERS: process.env.KAFKA_BROKERS || "localhost:9093",
   REDIS_URL: process.env.REDIS_URL || "redis://localhost:6379",
   USER_SERVICE_URL: process.env.USER_SERVICE_URL || "http://localhost:3000",
-  COMMUNITY_SERVICE_URL: process.env.COMMUNITY_SERVICE_URL || "http://localhost:3003"
+  COMMUNITY_SERVICE_URL: process.env.COMMUNITY_SERVICE_URL || "http://localhost:3003",
+  CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME,
+  CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY,
+  CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET,
 };
 
 export default envConfig;
