@@ -70,6 +70,51 @@ export const authHandler = (
   }
 };
 
+export const authPostOnlyHandler = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const authHeader = req.header('Authorization') || '';
+
+  let token: string | undefined;
+  if (authHeader.startsWith('Bearer ')) {
+    token = authHeader.substring(7);
+  } else if (typeof req.body?.access_token === 'string') {
+    token = req.body.access_token;
+  } else if (typeof req.query?.access_token === 'string') {
+    token = String(req.query.access_token);
+  }
+  if (!token) {
+    req.user = {
+      userId: 0,
+      email: '',
+      is_admin: false,
+    }
+    return next();
+  }
+
+  if (!envConfig.ACCESS_SECRET) {
+    return res.status(500).json({ message: 'JWT secret is not configured' });
+  }
+
+  try {
+    // jwt.verify returns string | JwtPayload, need to cast properly
+    const decoded = jwt.verify(token, envConfig.ACCESS_SECRET);
+    const payload = decoded as unknown as JwtPayload;
+
+    req.user = {
+      userId: payload.sub,
+      email: payload.email,
+      is_admin: payload.is_admin ?? false,
+    };
+
+    return next();
+  } catch (err) {
+    return res.status(401).json({ message: 'Authorization error: invalid or expired token' });
+  }
+}
+
 // export const authHandler = async (
 //   req: Request,
 //   res: Response,

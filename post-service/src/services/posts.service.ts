@@ -9,6 +9,7 @@ import { SavedPost } from "../models/saved-post.model.js";
 import { SavedPostRepository } from "../repositories/saved-post.repository.js";
 import { redis } from "../shared/middlewares/cache.middleware.js";
 import envConfig from "../config/env.config.js";
+import { createUniqueSlug } from "../shared/utils/stringHelper.js";
 
 export class PostService {
   private postRepo;
@@ -44,7 +45,18 @@ export class PostService {
       this.getCommunitiesInfo(communityIds),
     ]);
 
-    const enriched = result.posts.map(p => ({
+    let filteredPosts = result.posts;
+    if (currentUserId === 0) {
+      const publicCommunities = await this.getPublicCommunities();
+      const publicCommunityIds = new Set(publicCommunities.map((c: any) => c.community_id));
+      filteredPosts = filteredPosts.filter(p => publicCommunityIds.has(p.subreddit_id!));
+    } else {
+      const viewableCommunities = await this.getViewableCommunities(currentUserId);
+      const viewableCommunityIds = new Set(viewableCommunities.map((c: any) => c.community_id));
+      filteredPosts = filteredPosts.filter(p => viewableCommunityIds.has(p.subreddit_id!));
+    }
+
+    const enriched = filteredPosts.map(p => ({
       ...p,
       author: users[p.author_id] ?? null,
       community: communities[p.subreddit_id!] ?? null
@@ -135,8 +147,31 @@ export class PostService {
     return data;
   }
 
+  async getPublicCommunities() {
+    const res = await fetch(`${envConfig.COMMUNITY_SERVICE_URL}/api/community/public`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    });
+    const data = await res.json();
+    return data;
+  }
+
+  async getViewableCommunities(user_id: number) {
+    const res = await fetch(`${envConfig.COMMUNITY_SERVICE_URL}/api/community/viewable/${user_id}`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    });
+    const data = await res.json();
+    return data;
+  }
+
   async createPostWithMedia(postData: Partial<Post>, mediaList: Partial<PostMedia>[]) {
     const db = PostgresClient.getInstance();
+    let sluggedTitle = slug(postData.title || "");
+    const slugExists = await this.postRepo.findBySlug(sluggedTitle);
+    if (slugExists) {
+      sluggedTitle = createUniqueSlug(postData.title || "");
+    }
 
     const client = await db.connect(); // transaction
     try {
@@ -150,7 +185,7 @@ export class PostService {
           postData.subreddit_id || null,
           postData.title,
           postData.content,
-          slug(postData.title || ""),
+          sluggedTitle,
         ],
       );
 

@@ -20,5 +20,7 @@ router.put("/:id", CommunityController.update);
 // router.delete("/:id", CommunityController.delete);
 router.delete("/:id", CommunityController.deleteCommunity);
 router.post("/batch", CommunityController.getCommunitiesBatch);
+router.get("/public", CommunityController.getPublicCommunities);
+router.get("/viewable/:user_id", CommunityController.getViewableCommunities);
 
 export default router;

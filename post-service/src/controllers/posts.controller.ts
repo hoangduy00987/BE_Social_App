@@ -30,22 +30,25 @@ export class PostController {
     const { title, content, subreddit_id, media_type } = req.body;
     const file = req.file;
     const author_id = req.user?.userId;
-    
-    let fileUrl = "";
-    if (file) {
-      const b64 = Buffer.from(file.buffer).toString("base64");
-      const dataURI = `data:${file.mimetype};base64,${b64}`;
 
-      const result = await cloudinary.uploader.upload(dataURI, {
-        resource_type: media_type === "video" ? "video" : "auto",
-        folder: "post-assets",
-      });
-      fileUrl = result.secure_url;
+    let media = [];
+    
+    if (media_type) {
+      let fileUrl = "";
+      if (file) {
+        const b64 = Buffer.from(file.buffer).toString("base64");
+        const dataURI = `data:${file.mimetype};base64,${b64}`;
+
+        const result = await cloudinary.uploader.upload(dataURI, {
+          resource_type: media_type === "video" ? "video" : "auto",
+          folder: "post-assets",
+        });
+        fileUrl = result.secure_url;
+      }
+
+      media.push({ media_type, media_url: fileUrl });
     }
 
-    const media = [
-      { media_type, media_url: fileUrl }
-    ]
     const newPost = await this.postService.createPostWithMedia(
       { title, content, author_id, subreddit_id },
       media,
