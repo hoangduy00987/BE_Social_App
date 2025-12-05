@@ -65,4 +65,14 @@ export class CommunityService {
 
     return result;
   }
+
+  static async getPublicCommunities() {
+    const communities = await CommunityModel.findPublicCommunities();
+    return communities;
+  }
+
+  static async getViewableCommunities(user_id: number) {
+    const communities = await CommunityModel.findViewableCommunities(user_id);
+    return communities;
+  }
 }

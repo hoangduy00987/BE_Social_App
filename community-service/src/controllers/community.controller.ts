@@ -134,4 +134,15 @@ export class CommunityController {
     );
     res.json(communities);
   }
+
+  static async getPublicCommunities(req: Request, res: Response) {
+    const communities = await CommunityService.getPublicCommunities();
+    res.json(communities);
+  }
+
+  static async getViewableCommunities(req: Request, res: Response) {
+    const user_id = Number(req.params.user_id);
+    const communities = await CommunityService.getViewableCommunities(user_id);
+    res.json(communities);
+  }
 }

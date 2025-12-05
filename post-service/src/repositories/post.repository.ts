@@ -104,7 +104,7 @@ export class PostRepository {
     const res = await this.db.query(`SELECT * FROM posts WHERE slug = $1`, [
       slug,
     ]);
-    return res.rows[0];
+    return res.rows[0] || null;
   }
 
   async updateVoteCount(postId: number, delta: number): Promise<void> {

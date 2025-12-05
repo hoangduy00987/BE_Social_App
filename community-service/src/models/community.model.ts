@@ -210,4 +210,49 @@ export class CommunityModel {
 
     return communities;
   }
+
+  static async findPublicCommunities() {
+    return prisma.community.findMany({
+      where: {
+        communityType: {
+          type: {
+            in: ["Public", "Restricted"],
+          },
+        },
+      },
+      include: {
+        communityType: true,
+      },
+    });
+  }
+
+  static async findViewableCommunities(user_id: number) {
+    return prisma.community.findMany({
+      where: {
+        OR: [
+          {
+            communityType: {
+              type: { in: ["Public", "Restricted"] },
+            },
+          },
+          {
+            AND: [
+              { communityType: { type: "Private" } },
+              {
+                members: {
+                  some: {
+                    user_id,
+                    status: "APPROVED",
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      },
+      include: {
+        communityType: true,
+      },
+    });
+  }
 }
