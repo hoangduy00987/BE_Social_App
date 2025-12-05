@@ -8,12 +8,7 @@ export class PostgresClient {
 
   public static getInstance(): Pool {
     if (!PostgresClient.instance) {
-      PostgresClient.instance = new Pool({
-        ...DBConfig.getConfig(),
-        ssl: {
-          rejectUnauthorized: false,
-        },
-      });
+      PostgresClient.instance = new Pool(DBConfig.getConfig());
       console.log("PostgreSQL connected");
     }
     return PostgresClient.instance;

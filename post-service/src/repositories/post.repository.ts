@@ -5,20 +5,35 @@ export class PostRepository {
   private db = PostgresClient.getInstance();
 
   async findAll(
+    currentUserId: number,
     limit: number = 10,
     offset: number = 0,
   ): Promise<{ posts: Post[]; hasMore: boolean }> {
     const [posts, total] = await Promise.all([
       this.db.query(
         `
-        SELECT p.*, COUNT(c.id) AS nr_of_comments 
-        FROM posts p 
-        LEFT JOIN comments c ON c.post_id = p.id AND C.is_deleted = FALSE
-        WHERE p.is_deleted = FALSE 
-        GROUP BY p.id
-        ORDER BY p.created_at DESC LIMIT $1 OFFSET $2
+        SELECT 
+          p.*, 
+          COUNT(c.id) AS nr_of_comments,
+          COALESCE(v.vote_type, 0) AS my_vote
+        FROM posts p
+        LEFT JOIN comments c 
+          ON c.post_id = p.id 
+          AND c.is_deleted = FALSE
+        LEFT JOIN LATERAL (
+          SELECT vote_type 
+          FROM votes 
+          WHERE votes.user_id = $3 
+            AND votes.post_id = p.id 
+            AND votes.comment_id IS NULL
+          LIMIT 1
+        ) v ON TRUE
+        WHERE p.is_deleted = FALSE
+        GROUP BY p.id, v.vote_type
+        ORDER BY p.created_at DESC
+        LIMIT $1 OFFSET $2
         `,
-        [limit, offset],
+        [limit, offset, currentUserId],
       ),
       this.db.query("SELECT COUNT(*) FROM posts WHERE is_deleted = FALSE"),
     ]);
@@ -29,17 +44,35 @@ export class PostRepository {
     };
   }
 
-  async findById(id: number): Promise<Post | null> {
+  async findById(currentUserId: number, id: number): Promise<Post | null> {
     const res = await this.db.query(
       `
-      SELECT p.*, COUNT(c.id) AS nr_of_comments 
-      FROM posts p 
-      LEFT JOIN comments c ON c.post_id = p.id AND C.is_deleted = FALSE
-      WHERE p.id = $1
-      GROUP BY p.id
+      SELECT 
+        p.*, 
+        COUNT(c.id) AS nr_of_comments,
+        COALESCE(v.vote_type, 0) AS my_vote
+      FROM posts p
+      LEFT JOIN comments c 
+        ON c.post_id = p.id 
+        AND c.is_deleted = FALSE
+      LEFT JOIN LATERAL (
+        SELECT vote_type 
+        FROM votes 
+        WHERE votes.user_id = $1 
+          AND votes.post_id = p.id 
+          AND votes.comment_id IS NULL
+        LIMIT 1
+      ) v ON TRUE
+      WHERE p.id = $2 AND p.is_deleted = FALSE
+      GROUP BY p.id, v.vote_type
       `,
-      [id],
+      [currentUserId, id],
     );
+    return res.rows[0] || null;
+  }
+
+  async findOne(id: number): Promise<Post | null> {
+    const res = await this.db.query(`SELECT * FROM posts WHERE id = $1`, [id]);
     return res.rows[0] || null;
   }
 

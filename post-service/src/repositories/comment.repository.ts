@@ -4,20 +4,56 @@ import { Comment } from "../models/comment.model.js";
 export class CommentRepository {
   private db = PostgresClient.getInstance();
 
-  async findAll(post_id: number): Promise<Comment[]> {
+  async findAll(currentUserId: number, post_id: number): Promise<Comment[]> {
     const res = await this.db.query(
-      `SELECT * FROM comments WHERE post_id = $1 AND parent_comment_id IS NULL AND is_deleted = FALSE`,
-      [post_id],
+      `
+      SELECT 
+        c.*,
+        COALESCE(v.vote_type, 0) AS my_vote
+      FROM comments c
+      LEFT JOIN LATERAL (
+        SELECT vote_type
+        FROM votes
+        WHERE user_id = $2
+          AND comment_id = c.id
+        LIMIT 1
+      ) v ON TRUE
+      WHERE c.post_id = $1 
+        AND c.parent_comment_id IS NULL 
+        AND c.is_deleted = FALSE
+      ORDER BY c.created_at ASC
+      `,
+      [post_id, currentUserId],
     );
     return res.rows;
   }
 
-  async findAllReplies(comment_id: number): Promise<Comment[]> {
+  async findAllReplies(currentUserId: number, comment_id: number): Promise<Comment[]> {
     const res = await this.db.query(
-      `SELECT * FROM comments WHERE parent_comment_id = $1 AND is_deleted = FALSE`,
-      [comment_id],
+      `
+      SELECT 
+        c.*,
+        COALESCE(v.vote_type, 0) AS my_vote
+      FROM comments c
+      LEFT JOIN LATERAL (
+        SELECT vote_type
+        FROM votes
+        WHERE user_id = $2
+          AND comment_id = c.id
+        LIMIT 1
+      ) v ON TRUE
+      WHERE c.parent_comment_id = $1
+        AND c.is_deleted = FALSE
+      ORDER BY c.created_at ASC
+      `,
+      [comment_id, currentUserId],
     );
     return res.rows;
+  }
+
+  async findOne(id: number): Promise<Comment | null> {
+    const res = await this.db.query(`SELECT * FROM comments WHERE id = $1`, [id]);
+    return res.rows[0] || null;
   }
 
   async create(data: Partial<Comment>): Promise<Comment> {

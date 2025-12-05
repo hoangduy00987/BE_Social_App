@@ -10,14 +10,16 @@ export class CommentController {
 
   fetchComments = async (req: Request, res: Response) => {
     const post_id = parseInt(req.query.post_id as string) || 0;
-    const comments = await this.commentService.getAllComments(post_id);
+    const currentUserId = req.user?.userId || 0;
+    const comments = await this.commentService.getAllComments(currentUserId, post_id);
     res.json(comments);
   };
 
   fetchCommentReplies = async (req: Request, res: Response) => {
     const comment_id = parseInt(req.query.comment_id as string) || 0;
+    const currentUserId = req.user?.userId || 0;
     const comments =
-      await this.commentService.getAllCommentsReplies(comment_id);
+      await this.commentService.getAllCommentsReplies(currentUserId, comment_id);
     res.json(comments);
   };
 
