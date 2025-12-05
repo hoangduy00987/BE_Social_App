@@ -195,8 +195,9 @@ export class CommunityModel {
   }
 
   static async findManyCommunites(ids: number[]) {
+    const cleanedIds = ids.map((id) => (id === null ? 0 : id));
     const communities = await prisma.community.findMany({
-      where: { community_id: { in: ids } },
+      where: { community_id: { in: cleanedIds } },
       include: {
         communityType: { select: { type: true } },
         _count: {

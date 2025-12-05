@@ -6,7 +6,7 @@ import { join } from 'path';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  const uploadsPath = join(__dirname, '..', 'uploads');
+  const uploadsPath = join(__dirname, '..', '..', 'uploads');
   console.log('📁 Serving static files from:', uploadsPath);
   app.useStaticAssets(uploadsPath, {
     prefix: '/uploads/',

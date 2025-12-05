@@ -27,10 +27,11 @@ export class PostService {
   }
 
   async getAllPosts(
+    currentUserId: number,
     limit: number = 10,
     offset: number = 0,
   ): Promise<{ posts: Post[]; hasMore: boolean }> {
-    const result = await this.postRepo.findAll(limit, offset);
+    const result = await this.postRepo.findAll(currentUserId, limit, offset);
     const postIds = result.posts.map((p) => p.id);
     const media = await this.postMediaRepo.getByPostIds(postIds);
 
@@ -63,8 +64,8 @@ export class PostService {
     return { ...result, posts: mappedPosts };
   }
 
-  async getPostById(id: number): Promise<any | null> {
-    const post = await this.postRepo.findById(id);
+  async getPostById(currentUserId: number, id: number): Promise<any | null> {
+    const post = await this.postRepo.findById(currentUserId, id);
     const media = await this.postMediaRepo.getByPostId(id);
 
     if (!post) return null

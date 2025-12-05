@@ -11,7 +11,9 @@ export class PostController {
 
   getAll = async (req: Request, res: Response) => {
     const { limit, offset } = req.query;
+    const currentUserId = req.user?.userId || 0;
     const posts = await this.postService.getAllPosts(
+      currentUserId,
       parseInt(limit as string) || 10,
       parseInt(offset as string) || 0,
     );
@@ -19,7 +21,8 @@ export class PostController {
   };
 
   getById = async (req: Request, res: Response) => {
-    const post = await this.postService.getPostById(parseInt(req.params.id));
+    const currentUserId = req.user?.userId || 0;
+    const post = await this.postService.getPostById(currentUserId, parseInt(req.params.id));
     post ? res.json(post) : res.status(404).json({ message: "Post not found" });
   };
 
