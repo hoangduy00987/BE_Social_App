@@ -33,7 +33,7 @@ const envConfig: EnvConfig = {
     "http://localhost:3000",
     "http://localhost:8081",
   ],
-  KAFKA_BROKERS: process.env.KAFKA_BROKERS || "localhost:9093",
+  KAFKA_BROKERS: process.env.KAFKA_BROKERS || "localhost:9092",
   REDIS_URL: process.env.REDIS_URL || "redis://localhost:6379",
   USER_SERVICE_URL: process.env.USER_SERVICE_URL || "http://localhost:3000",
   COMMUNITY_SERVICE_URL: process.env.COMMUNITY_SERVICE_URL || "http://localhost:3003",
