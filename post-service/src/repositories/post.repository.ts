@@ -107,6 +107,14 @@ export class PostRepository {
     return res.rows[0] || null;
   }
 
+  async findByAuthorId(author_id: number): Promise<Post[]> {
+    const res = await this.db.query(
+      `SELECT * FROM posts WHERE author_id = $1 AND is_deleted = FALSE ORDER BY created_at DESC`,
+      [author_id],
+    );
+    return res.rows;
+  }
+
   async updateVoteCount(postId: number, delta: number): Promise<void> {
     await this.db.query(
       `UPDATE posts SET vote_count = vote_count + $1, updated_at = NOW() WHERE id = $2`,

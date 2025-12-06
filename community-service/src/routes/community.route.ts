@@ -10,6 +10,11 @@ router.get("/by-created", CommunityController.getAllCommunityCreatedBy);
 router.get("/top-community", CommunityController.topCommunity);
 router.get("/joined-community/:id", CommunityController.joinedCommunity);
 router.get("/search", CommunityController.search);
+
+router.get("/public", CommunityController.getPublicCommunities);
+router.get("/viewable/:user_id", CommunityController.getViewableCommunities);
+router.post("/batch", CommunityController.getCommunitiesBatch);
+
 router.get("/:id", CommunityController.getById);
 router.post(
   "/:id/upload-avatar",
@@ -19,8 +24,5 @@ router.post(
 router.put("/:id", CommunityController.update);
 // router.delete("/:id", CommunityController.delete);
 router.delete("/:id", CommunityController.deleteCommunity);
-router.post("/batch", CommunityController.getCommunitiesBatch);
-router.get("/public", CommunityController.getPublicCommunities);
-router.get("/viewable/:user_id", CommunityController.getViewableCommunities);
 
 export default router;

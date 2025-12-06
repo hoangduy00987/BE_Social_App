@@ -67,15 +67,26 @@ export class VoteService {
     try {
       await client.query("BEGIN");
 
-      await client.query(
-        `DELETE FROM votes WHERE user_id = $1 AND post_id = $2 AND comment_id = $3`,
-        [voteData.user_id, voteData.post_id, voteData.comment_id],
-      );
+      if (voteData.comment_id) {
+        await client.query(
+          `DELETE FROM votes WHERE user_id = $1 AND post_id = $2 AND comment_id = $3`,
+          [voteData.user_id, voteData.post_id, voteData.comment_id],
+        );
 
-      await client.query(
-        `UPDATE posts SET vote_count = vote_count + $1, updated_at = NOW() WHERE id = $2`,
-        [voteData.vote_type, voteData.post_id],
-      );
+        await client.query(
+          `UPDATE comments SET vote_count = vote_count + $1, updated_at = NOW() WHERE id = $2`,
+          [voteData.vote_type, voteData.comment_id],
+        );
+      } else {
+        await client.query(
+          `DELETE FROM votes WHERE user_id = $1 AND post_id = $2 AND comment_id IS NULL`,
+          [voteData.user_id, voteData.post_id],
+        );
+        await client.query(
+          `UPDATE posts SET vote_count = vote_count + $1, updated_at = NOW() WHERE id = $2`,
+          [voteData.vote_type, voteData.post_id],
+        );
+      }
 
       await client.query("COMMIT");
     } catch (error) {

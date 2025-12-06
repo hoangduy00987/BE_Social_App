@@ -69,6 +69,12 @@ export class PostController {
     res.status(204).send();
   };
 
+  getByUser = async (req: Request, res: Response) => {
+    const currentUserId = req.user?.userId || 0;
+    const posts = await this.postService.getPostsByUser(currentUserId);
+    res.json(posts);
+  }
+
   save = async (req: Request, res: Response) => {
     const { post_id } = req.body;
     const user_id = req.user?.userId;
@@ -80,7 +86,7 @@ export class PostController {
   };
 
   deleteSaved = async (req: Request, res: Response) => {
-    const { post_id } = req.body;
+    const post_id = parseInt(req.params.id);
     const user_id = req.user?.userId;
     await this.postService.deleteSavedPost({ user_id, post_id });
     res.status(204).send();
