@@ -36,7 +36,7 @@ export class CommentController {
   };
 
   deleteComment = async (req: Request, res: Response) => {
-    const { comment_id } = req.body;
+    const comment_id = parseInt(req.params.id);
     await this.commentService.deleteComment(comment_id);
     res.status(204).send();
   };

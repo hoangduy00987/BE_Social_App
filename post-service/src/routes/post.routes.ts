@@ -7,14 +7,17 @@ const router = Router();
 const controller = new PostController();
 
 router.get("/", authPostOnlyHandler, controller.getAll);
-router.get("/:id", authPostOnlyHandler, controller.getById);
 router.post("/", authHandler, upload.single("file"), controller.create);
-router.put("/:id", authHandler, controller.update);
-router.delete("/:id", authHandler, controller.delete);
 
 router.post("/save", authHandler, controller.save);
-router.delete("/saved", authHandler, controller.deleteSaved);
 router.get("/saved", authHandler, controller.getAllMySaved);
-router.get("/saved/mine", authHandler, controller.getMySaved);
+router.get("/my-saved", authHandler, controller.getMySaved);
+router.delete("/saved/:id", authHandler, controller.deleteSaved);
+
+router.get("/by-user", authPostOnlyHandler, controller.getByUser);
+
+router.get("/:id", authPostOnlyHandler, controller.getById);
+router.put("/:id", authHandler, controller.update);
+router.delete("/:id", authHandler, controller.delete);
 
 export default router;

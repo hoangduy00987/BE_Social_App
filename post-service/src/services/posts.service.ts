@@ -49,11 +49,11 @@ export class PostService {
     if (currentUserId === 0) {
       const publicCommunities = await this.getPublicCommunities();
       const publicCommunityIds = new Set(publicCommunities.map((c: any) => c.community_id));
-      filteredPosts = filteredPosts.filter(p => publicCommunityIds.has(p.subreddit_id!));
+      filteredPosts = filteredPosts.filter(p => !p.subreddit_id || publicCommunityIds.has(p.subreddit_id));
     } else {
       const viewableCommunities = await this.getViewableCommunities(currentUserId);
       const viewableCommunityIds = new Set(viewableCommunities.map((c: any) => c.community_id));
-      filteredPosts = filteredPosts.filter(p => viewableCommunityIds.has(p.subreddit_id!));
+      filteredPosts = filteredPosts.filter(p => !p.subreddit_id || viewableCommunityIds.has(p.subreddit_id));
     }
 
     const enriched = filteredPosts.map(p => ({
@@ -223,6 +223,40 @@ export class PostService {
 
   async deleteSavedPost(savedData: Partial<SavedPost>): Promise<void> {
     await this.savedPostRepo.delete(savedData);
+  }
+
+  async getPostsByUser(user_id: number): Promise<Post[]> {
+    const posts = await this.postRepo.findByAuthorId(user_id);
+    const postIds = posts.map((p) => p.id);
+    const media = await this.postMediaRepo.getByPostIds(postIds);
+
+    const userIds = [...new Set(posts.map(p => p.author_id))];
+    const communityIds = [...new Set(posts.map(p => p.subreddit_id!))];
+
+    // Fetch enriched info (cached)
+    const [users, communities] = await Promise.all([
+      this.getUsersInfo(userIds),
+      this.getCommunitiesInfo(communityIds),
+    ]);
+
+    const enriched = posts.map(p => ({
+      ...p,
+      author: users[p.author_id] ?? null,
+      community: communities[p.subreddit_id!] ?? null
+    }));
+
+    const mediaMap = media.reduce((acc, m) => {
+      acc[m.post_id] = acc[m.post_id] || [];
+      acc[m.post_id].push(m);
+      return acc;
+    }, {});
+
+    const mappedPosts = enriched.map((p) => ({
+      ...p,
+      media: mediaMap[p.id] || [],
+    }));
+
+    return mappedPosts;
   }
 
   async getAllMySaved(savedData: Partial<SavedPost>): Promise<SavedPost[]> {

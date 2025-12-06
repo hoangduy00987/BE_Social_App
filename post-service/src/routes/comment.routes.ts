@@ -8,6 +8,6 @@ const controller = new CommentController();
 router.get("/fetch", controller.fetchComments);
 router.get("/fetch-replies", controller.fetchCommentReplies);
 router.post("/create", authHandler, controller.createComment);
-router.delete("/delete", authHandler, controller.deleteComment);
+router.delete("/delete/:id", authHandler, controller.deleteComment);
 
 export default router;
