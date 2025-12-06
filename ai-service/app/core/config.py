@@ -7,8 +7,10 @@ env_path = Path(__file__).resolve().parents[3] / ".env"
 
 
 load_dotenv(dotenv_path=env_path)
+class Settings:
+    OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY")
+    NEO4J_URI: str = os.getenv("NEO4J_URI")
+    NEO4J_USER: str = os.getenv("NEO4J_USER", "neo4j")
+    NEO4J_PASSWORD: str = os.getenv("NEO4J_PASSWORD", "password")
 
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-NEO4J_URI = os.getenv("NEO4J_URI")
-NEO4J_USER = os.getenv("NEO4J_USER")
-NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD")
+settings = Settings()
